@@ -164,6 +164,23 @@ button:not(.opaque):active, a:not(.opaque):active, .clickable:not(.opaque):activ
 .coeff-links { margin-top: 5px; margin-left: 20px; font-size: clamp(12px, 1.4vw, 15px); font-weight: 500; }
 .coeff-copied { color: #44b732 !important; }
 
+/* ===== API BANNER ===== */
+.api-banner {
+    width: 100%; padding: 10px 14px; margin-bottom: 20px;
+    background: #fff3e0; border: 1px solid #ffe0b2; border-radius: var(--radius);
+    align-items: center; justify-content: space-between; gap: 12px;
+    font-size: clamp(12px, 1.4vw, 14px); color: #6d4c00;
+}
+.api-banner-title { font-weight: 600; }
+.api-banner-actions { align-items: center; gap: 10px; flex-shrink: 0; }
+.api-banner-btn {
+    padding: 4px 12px; border-radius: 4px;
+    background: #ff9800; color: #fff; font-weight: 600; font-size: 12px;
+    white-space: nowrap;
+}
+.api-banner-btn:hover { opacity: .85; }
+.api-banner-dismiss { color: #6d4c00; font-size: 16px; line-height: 1; }
+
 /* ===== SEPARATOR ===== */
 hr.separator { width: 100%; margin-top: 25px; opacity: .3; border-bottom: 0; border-color: var(--surface); }
 

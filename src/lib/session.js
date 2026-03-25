@@ -57,6 +57,43 @@ export async function fetchMarksAndUpdates(filtersValues, status) {
 }
 
 /**
+ * Try to load marks from localStorage cache (saved by the updates system).
+ * Returns a render-ready data object, or null if no cache exists.
+ */
+export function loadCachedMarks(filtersValues) {
+    const save = JSON.parse(localStorage.getItem('auriga_marks_save') || '{}');
+    const key = JSON.stringify(filtersValues);
+    const marks = save[key];
+    if (!marks || marks.length === 0) return null;
+
+    // Recompute student average from cached marks
+    // _rawCoefficient holds the pre-normalization value set by applyCoefficients
+    let totalSum = 0;
+    let totalWeight = 0;
+    for (const mod of marks) {
+        for (const sub of mod.subjects) {
+            for (const mark of sub.marks) {
+                if (mark.value != null && mark.value !== 0.01) {
+                    const coef = mark._rawCoefficient ?? mark.coefficient;
+                    totalSum += mark.value * coef;
+                    totalWeight += coef;
+                }
+            }
+        }
+    }
+
+    const updates = JSON.parse(localStorage.getItem('auriga_updates') || '{}');
+
+    return {
+        marks,
+        averages: { student: totalWeight > 0 ? totalSum / totalWeight : null, promo: null },
+        updates: updates[key] || [],
+        coeffSource: null,
+        coeffTemplate: null,
+    };
+}
+
+/**
  * Persist semester selection.
  */
 export function saveSemesterFilter(value) {

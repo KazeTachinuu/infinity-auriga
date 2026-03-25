@@ -8,6 +8,29 @@ import { copyCodeEl } from './tooltip.js';
 import { renderComboBox, renderUpdate, renderSubject, renderFooter } from './components.js';
 
 /**
+ * Build a dismissable warning banner shown when the API failed but cached data is available.
+ */
+function createApiBanner(error, onRetry, filtersValues) {
+    const banner = h('div', { class: 'api-banner' },
+        h('div', { class: 'api-banner-text' },
+            h('span', { class: 'api-banner-title' }, 'Hors-ligne'),
+            h('span', { class: 'api-banner-detail' }, ' \u2014 impossible de contacter Auriga. Vos notes peuvent \u00eatre obsol\u00e8tes.')
+        ),
+        h('div', { class: 'api-banner-actions' },
+            h('a', {
+                href: '#', class: 'api-banner-btn',
+                onclick: (e) => { e.preventDefault(); onRetry(filtersValues.semester); }
+            }, 'R\u00e9essayer'),
+            h('a', {
+                href: '#', class: 'api-banner-dismiss',
+                onclick: (e) => { e.preventDefault(); banner.remove(); }
+            }, '\u2715')
+        )
+    );
+    return banner;
+}
+
+/**
  * Build a one-click "contribute" link that opens GitHub's new-file page
  * with the filename and template content pre-filled.
  * Falls back to clipboard + redirect when the URL would be too long.
@@ -40,7 +63,7 @@ function createContributeLink({ filename, content }) {
     return link;
 }
 
-export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffTemplate, onSemesterChange }) {
+export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffTemplate, apiError, onSemesterChange }) {
     container.replaceChildren();
 
     // Background
@@ -88,6 +111,7 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
         ),
         h('div', { id: 'main' },
             h('div', { class: 'content' },
+                ...(apiError ? [createApiBanner(apiError, onSemesterChange, filtersValues)] : []),
                 h('div', { class: 'filters' },
                     ...filters.map(f => renderComboBox(f.name, f.values, filtersValues[f.id], (choice) => {
                         if (f.id === 'semester') onSemesterChange(choice.value);

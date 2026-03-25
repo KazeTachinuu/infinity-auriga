@@ -14,7 +14,7 @@
  */
 
 // Auto-discover all coefficient files at build time (Vite glob import)
-const modules = import.meta.glob('./*.js', { import: 'default' });
+const modules = import.meta.glob(['./*.js', '!./*.test.js'], { import: 'default' });
 
 /**
  * Load coefficient overrides for a semester/track combo.

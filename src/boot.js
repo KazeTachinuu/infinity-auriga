@@ -1,5 +1,5 @@
 import { setApiRequestHook } from './lib/auriga/api.js';
-import { loadSession, fetchMarksAndUpdates, saveSemesterFilter } from './lib/session.js';
+import { loadSession, fetchMarksAndUpdates, saveSemesterFilter, loadCachedMarks } from './lib/session.js';
 import { setupToggle } from './lib/toggle.js';
 import { app } from './app.js';
 
@@ -27,27 +27,54 @@ export async function boot(container) {
         const { name, filters } = session;
 
         async function refresh() {
+            const onSemesterChange = (value) => {
+                filtersValues = saveSemesterFilter(value);
+                refresh();
+            };
             try {
                 const s = renderLoadingScreen(container);
                 setApiRequestHook((url) => s.request(url));
                 const data = await fetchMarksAndUpdates(filtersValues, s);
                 renderApp(container, {
-                    name, filters, filtersValues,
-                    ...data,
-                    onSemesterChange(value) {
-                        filtersValues = saveSemesterFilter(value);
-                        refresh();
-                    },
+                    name, filters, filtersValues, ...data, onSemesterChange,
                 });
             } catch (err) {
                 console.error('[Infinity Auriga]', err);
-                renderError(container, err);
+                // Show cached data with a warning instead of blocking the user
+                const cached = loadCachedMarks(filtersValues);
+                if (cached) {
+                    renderApp(container, {
+                        name, filters, filtersValues, ...cached,
+                        apiError: err, onSemesterChange,
+                    });
+                } else {
+                    renderError(container, err);
+                }
             }
         }
 
         await refresh();
     } catch (err) {
         console.error('[Infinity Auriga]', err);
+
+        // If the initial load fails but we have cached data, show it with a warning
+        const savedFilter = localStorage.getItem('auriga_filters');
+        if (savedFilter) {
+            const filtersValues = JSON.parse(savedFilter);
+            const cached = loadCachedMarks(filtersValues);
+            if (cached) {
+                renderApp(container, {
+                    name: 'Etudiant', filters: [], filtersValues, ...cached,
+                    apiError: err,
+                    onSemesterChange(value) {
+                        localStorage.setItem('auriga_filters', JSON.stringify({ semester: value }));
+                        window.location.reload();
+                    },
+                });
+                return;
+            }
+        }
+
         renderError(container, err);
     }
 }
