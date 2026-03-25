@@ -162,6 +162,7 @@ button:not(.opaque):active, a:not(.opaque):active, .clickable:not(.opaque):activ
 .coeff-main { align-items: center; gap: 12px; font-weight: 500; }
 .coeff-muted { color: var(--text-muted); font-weight: 400; }
 .coeff-links { margin-top: 5px; margin-left: 20px; font-size: clamp(12px, 1.4vw, 15px); font-weight: 500; }
+.coeff-copied { color: #44b732 !important; }
 
 /* ===== SEPARATOR ===== */
 hr.separator { width: 100%; margin-top: 25px; opacity: .3; border-bottom: 0; border-color: var(--surface); }

@@ -1,7 +1,7 @@
 import { getName } from './auriga/auth.js';
 import { getMarks, getMarksFilters } from './auriga/marks.js';
 import { getUpdates } from './updates.js';
-import { loadCoefficients, applyCoefficients } from './coefficients/index.js';
+import { loadCoefficients, applyCoefficients, generateTemplate } from './coefficients/index.js';
 
 /**
  * Load initial session: user name, available filters, last selection.
@@ -42,11 +42,17 @@ export async function fetchMarksAndUpdates(filtersValues, status) {
     status?.step('Calcul des changements...');
     const updates = getUpdates(filtersValues, marks);
 
+    // When no coefficient file exists, generate a pre-filled template for contributors
+    const coeffTemplate = !coeffData && track
+        ? generateTemplate(marks, filtersValues.semester, track)
+        : null;
+
     return {
         marks,
         averages: { student: average, promo: result.classAverage },
         updates,
         coeffSource: coeffData?.file ?? null,
+        coeffTemplate,
     };
 }
 

@@ -29,6 +29,61 @@ export async function loadCoefficients(semesterKey, track) {
 }
 
 /**
+ * Generate a pre-filled coefficient template from the current grade tree.
+ * All marks are listed with coefficient 1, organized by module/subject with
+ * human-readable comments — ready for a contributor to fill in real values.
+ *
+ * @param {Module[]} marks - grade tree (after buildGradeTree, before applyCoefficients)
+ * @param {string} semesterKey - e.g. "S07_2526"
+ * @param {string} track - e.g. "FISA"
+ * @returns {{ filename: string, content: string }}
+ */
+export function generateTemplate(marks, semesterKey, track) {
+    const [semester, year] = semesterKey.split('_');
+    const filename = `${semesterKey}_${track}`.toLowerCase() + '.js';
+    const yearLabel = `20${year.slice(0, 2)}/20${year.slice(2)}`;
+
+    // Collect all mark entries with their module context
+    const entries = [];
+    for (const mod of marks) {
+        const modEntries = [];
+        for (const sub of mod.subjects) {
+            for (const mark of sub.marks) {
+                modEntries.push({ code: mark._code, name: mark.name });
+            }
+        }
+        if (modEntries.length > 0) {
+            entries.push({ module: mod.name, marks: modEntries });
+        }
+    }
+
+    // Find max code length for aligned comments
+    const maxLen = Math.max(...entries.flatMap(e => e.marks.map(m => m.code.length)));
+
+    const lines = [
+        `/**`,
+        ` * Coefficients — ${semester} ${track} ${yearLabel}`,
+        ` * Only list entries whose coefficient is NOT 1.`,
+        ` */`,
+        `export default {`,
+    ];
+
+    for (let i = 0; i < entries.length; i++) {
+        const { module: modName, marks: modMarks } = entries[i];
+        lines.push(`    // ── ${modName} ${'─'.repeat(Math.max(1, 50 - modName.length))}`);
+        for (const { code, name } of modMarks) {
+            const pad = ' '.repeat(Math.max(1, maxLen - code.length));
+            lines.push(`    '${code}': 1,${pad} // ${name}`);
+        }
+        if (i < entries.length - 1) lines.push('');
+    }
+
+    lines.push(`};`, '');
+
+    return { filename, content: lines.join('\n') };
+}
+
+/**
  * Apply coefficient overrides and compute all averages.
  *
  * @param {Module[]} marks - grade tree (mutated in place)

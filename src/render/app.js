@@ -7,7 +7,40 @@ import { h, html, gradeColor, formatGrade, gradeSpan, topTriangle, bottomTriangl
 import { copyCodeEl } from './tooltip.js';
 import { renderComboBox, renderUpdate, renderSubject, renderFooter } from './components.js';
 
-export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, onSemesterChange }) {
+/**
+ * Build a one-click "contribute" link that opens GitHub's new-file page
+ * with the filename and template content pre-filled.
+ * Falls back to clipboard + redirect when the URL would be too long.
+ */
+function createContributeLink({ filename, content }) {
+    const basePath = `${app.repository}/new/master/src/lib/coefficients`;
+    const encoded = encodeURIComponent(content);
+    const fullUrl = `${basePath}?filename=${encodeURIComponent(filename)}&value=${encoded}`;
+
+    // GitHub URLs have practical limits (~8k). If the template fits, use a direct link.
+    if (fullUrl.length <= 8000) {
+        return h('a', { href: fullUrl, target: '_blank', class: 'link colored' },
+            `Créer ${filename} sur GitHub`
+        );
+    }
+
+    // For larger templates: copy to clipboard, then open the new-file page with just the filename
+    const link = h('a', {
+        href: '#',
+        class: 'link colored',
+        onclick: (e) => {
+            e.preventDefault();
+            navigator.clipboard.writeText(content).then(() => {
+                link.textContent = 'Copié ! Collez dans l\u2019éditeur GitHub\u2026';
+                link.classList.add('coeff-copied');
+                window.open(`${basePath}?filename=${encodeURIComponent(filename)}`, '_blank');
+            });
+        }
+    }, `Créer ${filename} sur GitHub`);
+    return link;
+}
+
+export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffTemplate, onSemesterChange }) {
     container.replaceChildren();
 
     // Background
@@ -93,9 +126,11 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                                 '\u00a0\u00b7\u00a0',
                                 h('a', { href: `${app.repository}/tree/master/src/lib/coefficients`, target: '_blank', class: 'link colored' }, 'Modifier'),
                             ]
-                            : [
-                                h('a', { href: `${app.repository}/tree/master/src/lib/coefficients`, target: '_blank', class: 'link colored' }, 'Contribuer les vrais coefficients'),
-                            ]
+                            : coeffTemplate
+                                ? [createContributeLink(coeffTemplate)]
+                                : [
+                                    h('a', { href: `${app.repository}/tree/master/src/lib/coefficients`, target: '_blank', class: 'link colored' }, 'Contribuer les vrais coefficients'),
+                                ]
                         )
                     )
                 ),
