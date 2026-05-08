@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinity Auriga
 // @namespace    infinity-auriga
-// @version      1.9.7
+// @version      1.9.8
 // @description  Make Auriga Great Again - enhanced grades UI for EPITA
 // @author       KazeTachinuu & contributors
 // @match        https://auriga.epita.fr/*
@@ -844,7 +844,7 @@
 	//#region package.json
 	var version;
 	var init_package = __esmMin((() => {
-		version = "1.9.7";
+		version = "1.9.8";
 	}));
 	//#endregion
 	//#region src/app.js
@@ -2010,10 +2010,9 @@
 		return btn;
 	}
 	/**
-	* Compact FR | EN segmented toggle. setLang triggers all subscribers,
-	* which includes boot.js's re-render of the whole app.
+	* Compact FR | EN segmented toggle. Re-renders the app after changing language.
 	*/
-	function renderLangToggle() {
+	function renderLangToggle(onChange) {
 		const current = getLang();
 		return h("div", {
 			class: "lang-toggle",
@@ -2021,11 +2020,15 @@
 			"aria-label": "Language"
 		}, ...availableLangs().map((code) => h("button", {
 			class: "lang-btn" + (code === current ? " active" : ""),
-			onclick: () => setLang(code),
+			onclick: () => {
+				setLang(code);
+				onChange?.();
+			},
 			"aria-pressed": code === current ? "true" : "false"
 		}, code.toUpperCase())));
 	}
-	function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange }) {
+	function renderApp(container, props) {
+		const { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange } = props;
 		container.replaceChildren();
 		const hasCachedData = marks.length > 0;
 		container.appendChild(apiError ? h("div", { id: "background" }, createApiErrorPanel(apiError, hasCachedData)) : h("div", { id: "background" }, html("div", {
@@ -2073,7 +2076,7 @@
 		}, h("div", { id: "header" }, html("div", {
 			id: "logo",
 			class: "variable"
-		}, logo_default), ...name ? [h("div", { class: "header-actions" }, renderLangToggle(), h("a", {
+		}, logo_default), ...name ? [h("div", { class: "header-actions" }, renderLangToggle(() => renderApp(container, props)), h("a", {
 			id: "update-btn",
 			style: { display: "none" }
 		}), h("a", {
@@ -2081,16 +2084,9 @@
 			href: "#",
 			onclick: (e) => {
 				e.preventDefault();
-				printAs("fr");
+				printAs(getLang());
 			}
-		}, html("span", { class: "export-icon" }, ExportSvg), t("header.exportFr")), h("a", {
-			id: "export-btn-en",
-			href: "#",
-			onclick: (e) => {
-				e.preventDefault();
-				printAs("en");
-			}
-		}, html("span", { class: "export-icon" }, ExportSvg), t("header.exportEn")), h("a", {
+		}, html("span", { class: "export-icon" }, ExportSvg), t("header.exportPdf")), h("a", {
 			id: "logout",
 			href: "#",
 			onclick: (e) => {

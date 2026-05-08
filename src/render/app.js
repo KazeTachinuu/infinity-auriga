@@ -75,23 +75,23 @@ function createCopyTemplateBtn({ content }) {
 }
 
 /**
- * Compact FR | EN segmented toggle. setLang triggers all subscribers,
- * which includes boot.js's re-render of the whole app.
+ * Compact FR | EN segmented toggle. Re-renders the app after changing language.
  */
-function renderLangToggle() {
+function renderLangToggle(onChange) {
     const current = getLang();
     return h('div', { class: 'lang-toggle', role: 'group', 'aria-label': 'Language' },
         ...availableLangs().map(code =>
             h('button', {
                 class: 'lang-btn' + (code === current ? ' active' : ''),
-                onclick: () => setLang(code),
+                onclick: () => { setLang(code); onChange?.(); },
                 'aria-pressed': code === current ? 'true' : 'false',
             }, code.toUpperCase())
         )
     );
 }
 
-export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange }) {
+export function renderApp(container, props) {
+    const { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange } = props;
     container.replaceChildren();
 
     const hasCachedData = marks.length > 0;
@@ -154,12 +154,10 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
         h('div', { id: 'header' },
             html('div', { id: 'logo', class: 'variable' }, LogoSvg),
             ...(name ? [h('div', { class: 'header-actions' },
-                renderLangToggle(),
+                renderLangToggle(() => renderApp(container, props)),
                 h('a', { id: 'update-btn', style: { display: 'none' } }),
-                h('a', { id: 'export-btn', href: '#', onclick: (e) => { e.preventDefault(); printAs('fr'); } },
-                    html('span', { class: 'export-icon' }, ExportSvg), t('header.exportFr')),
-                h('a', { id: 'export-btn-en', href: '#', onclick: (e) => { e.preventDefault(); printAs('en'); } },
-                    html('span', { class: 'export-icon' }, ExportSvg), t('header.exportEn')),
+                h('a', { id: 'export-btn', href: '#', onclick: (e) => { e.preventDefault(); printAs(getLang()); } },
+                    html('span', { class: 'export-icon' }, ExportSvg), t('header.exportPdf')),
                 h('a', { id: 'logout', href: '#', onclick: (e) => {
                     e.preventDefault();
                     window.location.href = 'https://ionisepita-auth.np-auriga.nfrance.net/auth/realms/npionisepita/protocol/openid-connect/logout?post_logout_redirect_uri=' + encodeURIComponent('https://auriga.epita.fr');
