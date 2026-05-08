@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinity Auriga
 // @namespace    infinity-auriga
-// @version      1.9.8
+// @version      1.9.9
 // @description  Make Auriga Great Again - enhanced grades UI for EPITA
 // @author       KazeTachinuu & contributors
 // @match        https://auriga.epita.fr/*
@@ -844,7 +844,7 @@
 	//#region package.json
 	var version;
 	var init_package = __esmMin((() => {
-		version = "1.9.8";
+		version = "1.9.9";
 	}));
 	//#endregion
 	//#region src/app.js
@@ -1676,8 +1676,7 @@
 			fr: {
 				header: {
 					logout: "Se deconnecter",
-					exportFr: "PDF",
-					exportEn: "PDF EN"
+					exportPdf: "Exporter PDF"
 				},
 				sidebar: {
 					changes: "Derniers changements",
@@ -1776,8 +1775,7 @@
 			en: {
 				header: {
 					logout: "Log out",
-					exportFr: "PDF",
-					exportEn: "PDF EN"
+					exportPdf: "Export PDF"
 				},
 				sidebar: {
 					changes: "Recent changes",

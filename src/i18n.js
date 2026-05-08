@@ -15,8 +15,7 @@ const dict = {
     fr: {
         header: {
             logout: 'Se deconnecter',
-            exportFr: 'PDF',
-            exportEn: 'PDF EN',
+            exportPdf: 'Exporter PDF',
         },
         sidebar: {
             changes: 'Derniers changements',
@@ -115,8 +114,7 @@ const dict = {
     en: {
         header: {
             logout: 'Log out',
-            exportFr: 'PDF',
-            exportEn: 'PDF EN',
+            exportPdf: 'Export PDF',
         },
         sidebar: {
             changes: 'Recent changes',
