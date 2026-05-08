@@ -91,7 +91,7 @@ export function parseGradeLine(line) {
  * @param {Array} line - Raw array from Auriga searchResult
  * @returns {{ examCode: string, name: string, avgPreRatt: *, avgFinal: * } | null}
  */
-export function parseSynthesisLine(line) {
+export function parseSynthesisLine(line, lang = null) {
     const examCode = line[SYNTHESIS.examCode];
     if (!examCode || typeof examCode !== 'string') {
         console.warn('[Infinity] Unexpected synthesis line — examCode missing at index', SYNTHESIS.examCode, line);
@@ -99,10 +99,12 @@ export function parseSynthesisLine(line) {
     }
 
     const caption = line[SYNTHESIS.caption] || {};
+    const fr = typeof caption === 'string' && lang === 'fr' ? caption : caption.fr;
+    const en = typeof caption === 'string' && lang === 'en' ? caption : caption.en;
     return {
         examCode,
-        name: caption.fr || caption.en || examCode,
-        nameEn: caption.en || caption.fr || examCode,
+        name: fr || en || examCode,
+        nameEn: en || fr || examCode,
         avgPreRatt: line[SYNTHESIS.avgPreRatt],
         avgFinal: line[SYNTHESIS.avgFinal],
     };

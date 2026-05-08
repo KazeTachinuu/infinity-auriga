@@ -51,9 +51,10 @@ export async function apiFetch(path, options = {}, _retried = false) {
 }
 
 /** Fetch all pages of a search result endpoint, returning all lines across pages. */
-export async function fetchAllSearchResults(menuEntryId, queryId) {
+export async function fetchAllSearchResults(menuEntryId, queryId, lang = null) {
     const queryDef = await apiFetch(`/menuEntries/${menuEntryId}/query/${queryId}`);
-    const body = queryDef.queryDefinition;
+    const body = structuredClone(queryDef.queryDefinition);
+    if (lang && body?.searchResultDefinition) body.searchResultDefinition.lang = lang;
 
     let allLines = [];
     let page = 1;

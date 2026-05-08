@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinity Auriga
 // @namespace    infinity-auriga
-// @version      1.9.10
+// @version      1.9.11
 // @description  Make Auriga Great Again - enhanced grades UI for EPITA
 // @author       KazeTachinuu & contributors
 // @match        https://auriga.epita.fr/*
@@ -87,8 +87,10 @@
 		}
 	}
 	/** Fetch all pages of a search result endpoint, returning all lines across pages. */
-	async function fetchAllSearchResults(menuEntryId, queryId) {
-		const body = (await apiFetch(`/menuEntries/${menuEntryId}/query/${queryId}`)).queryDefinition;
+	async function fetchAllSearchResults(menuEntryId, queryId, lang = null) {
+		const queryDef = await apiFetch(`/menuEntries/${menuEntryId}/query/${queryId}`);
+		const body = structuredClone(queryDef.queryDefinition);
+		if (lang && body?.searchResultDefinition) body.searchResultDefinition.lang = lang;
 		let allLines = [];
 		let page = 1;
 		let totalPages = 1;
@@ -640,17 +642,19 @@
 	* @param {Array} line - Raw array from Auriga searchResult
 	* @returns {{ examCode: string, name: string, avgPreRatt: *, avgFinal: * } | null}
 	*/
-	function parseSynthesisLine(line) {
+	function parseSynthesisLine(line, lang = null) {
 		const examCode = line[SYNTHESIS.examCode];
 		if (!examCode || typeof examCode !== "string") {
 			console.warn("[Infinity] Unexpected synthesis line — examCode missing at index", SYNTHESIS.examCode, line);
 			return null;
 		}
 		const caption = line[SYNTHESIS.caption] || {};
+		const fr = typeof caption === "string" && lang === "fr" ? caption : caption.fr;
+		const en = typeof caption === "string" && lang === "en" ? caption : caption.en;
 		return {
 			examCode,
-			name: caption.fr || caption.en || examCode,
-			nameEn: caption.en || caption.fr || examCode,
+			name: fr || en || examCode,
+			nameEn: en || fr || examCode,
 			avgPreRatt: line[SYNTHESIS.avgPreRatt],
 			avgFinal: line[SYNTHESIS.avgFinal]
 		};
@@ -694,6 +698,20 @@
 	}
 	var _cachedSynthesisEntries = null;
 	var _componentTypesPromise;
+	async function fetchSynthesisEntries(menuEntryId, queryId) {
+		const [rawFr, rawEn] = await Promise.all([fetchAllSearchResults(menuEntryId, queryId, "fr"), fetchAllSearchResults(menuEntryId, queryId, "en")]);
+		const frEntries = rawFr.map((line) => parseSynthesisLine(line, "fr")).filter(Boolean);
+		const enEntries = rawEn.map((line) => parseSynthesisLine(line, "en")).filter(Boolean);
+		validateParseResults("synthesis", rawFr, frEntries);
+		const byCode = new Map(enEntries.map((e) => [e.examCode, e]));
+		return frEntries.map((fr) => {
+			const en = byCode.get(fr.examCode);
+			return en ? {
+				...fr,
+				nameEn: en.nameEn || en.name || fr.nameEn
+			} : fr;
+		});
+	}
 	/** Fetch component type map from the pedagogical endpoint, or null if unavailable. */
 	function getComponentTypes() {
 		if (_componentTypesPromise) return _componentTypesPromise;
@@ -714,9 +732,7 @@
 	}
 	async function getMarksFilters() {
 		const synth = (await getMenuConfig()).synthesis;
-		const rawLines = await fetchAllSearchResults(synth.menuEntryId, synth.queryId);
-		const entries = rawLines.map(parseSynthesisLine).filter(Boolean);
-		validateParseResults("synthesis", rawLines, entries);
+		const entries = await fetchSynthesisEntries(synth.menuEntryId, synth.queryId);
 		_cachedSynthesisEntries = entries;
 		const semesters = /* @__PURE__ */ new Map();
 		for (const entry of entries) {
@@ -750,11 +766,7 @@
 				validateParseResults("grades", raw, entries);
 				return entries;
 			}),
-			_cachedSynthesisEntries ? Promise.resolve(_cachedSynthesisEntries) : fetchAllSearchResults(config.synthesis.menuEntryId, config.synthesis.queryId).then((raw) => {
-				const entries = raw.map(parseSynthesisLine).filter(Boolean);
-				validateParseResults("synthesis", raw, entries);
-				return entries;
-			}),
+			_cachedSynthesisEntries ? Promise.resolve(_cachedSynthesisEntries) : fetchSynthesisEntries(config.synthesis.menuEntryId, config.synthesis.queryId),
 			getComponentTypes()
 		]);
 		const filteredGrades = rawGrades.filter((g) => {
@@ -864,7 +876,7 @@
 	//#region package.json
 	var version;
 	var init_package = __esmMin((() => {
-		version = "1.9.10";
+		version = "1.9.11";
 	}));
 	//#endregion
 	//#region src/app.js
