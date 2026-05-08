@@ -24,6 +24,11 @@ const EVAL_LABELS = {
     PRJ: 'Projet', PROJ: 'Projet', FAF: 'Contrôle continu',
 };
 
+const EVAL_LABELS_EN = {
+    EX: 'Exam', EXF: 'Final exam', EXO: 'Oral exam',
+    PRJ: 'Project', PROJ: 'Project', FAF: 'Continuous assessment',
+};
+
 
 /**
  * @param {string} code - The full exam code
@@ -297,6 +302,7 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
             id: sub.marks.length,
             _code: grade.examCode,
             name: examInfo ? examInfo.name : (parsed.evalType || 'Note'),
+            nameEn: examInfo ? (examInfo.nameEn || examInfo.name) : (parsed.evalType || 'Mark'),
             value: grade.mark,
             classAverage: isNaN(promoAvg) ? null : promoAvg,
             coefficient: grade.coefficient,
@@ -321,23 +327,36 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
 
             // Count how many marks share each base
             const baseCounts = new Map();
+            const baseCountsEn = new Map();
             for (const mark of sub.marks) {
                 const base = baseName(mark.name);
+                const baseEn = baseName(mark.nameEn || mark.name);
                 baseCounts.set(base, (baseCounts.get(base) || 0) + 1);
+                baseCountsEn.set(baseEn, (baseCountsEn.get(baseEn) || 0) + 1);
             }
 
             // Apply grouping to marks whose base has 2+ members
             for (const mark of sub.marks) {
                 const base = baseName(mark.name);
-                if (baseCounts.get(base) < 2) continue;
+                const baseEn = baseName(mark.nameEn || mark.name);
+                const grouped = baseCounts.get(base) >= 2;
+                const groupedEn = baseCountsEn.get(baseEn) >= 2;
+                if (!grouped && !groupedEn) continue;
 
-                mark._group = base;
-                if (mark.name === base) {
+                if (grouped) mark._group = base;
+                if (groupedEn) mark._groupEn = baseEn;
+                if (grouped && mark.name === base) {
                     // No suffix — use eval type as label
                     const parsed = parseExamCode(mark._code);
                     mark.name = parsed?.evalType
                         ? (EVAL_LABELS[parsed.evalType] || parsed.evalType)
                         : base;
+                }
+                if (groupedEn && mark.nameEn === baseEn) {
+                    const parsed = parseExamCode(mark._code);
+                    mark.nameEn = parsed?.evalType
+                        ? (EVAL_LABELS_EN[parsed.evalType] || parsed.evalType)
+                        : baseEn;
                 }
                 // Marks with suffix get prefix stripped in rendering
             }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Infinity Auriga
 // @namespace    infinity-auriga
-// @version      1.9.9
+// @version      1.9.10
 // @description  Make Auriga Great Again - enhanced grades UI for EPITA
 // @author       KazeTachinuu & contributors
 // @match        https://auriga.epita.fr/*
@@ -255,6 +255,14 @@
 		PROJ: "Projet",
 		FAF: "Contrôle continu"
 	};
+	var EVAL_LABELS_EN = {
+		EX: "Exam",
+		EXF: "Final exam",
+		EXO: "Oral exam",
+		PRJ: "Project",
+		PROJ: "Project",
+		FAF: "Continuous assessment"
+	};
 	/**
 	* @param {string} code - The full exam code
 	* @param {string|null} [apiExamType] - Exam type from the API column (skips guessing when present)
@@ -497,6 +505,7 @@
 				id: sub.marks.length,
 				_code: grade.examCode,
 				name: examInfo ? examInfo.name : parsed.evalType || "Note",
+				nameEn: examInfo ? examInfo.nameEn || examInfo.name : parsed.evalType || "Mark",
 				value: grade.mark,
 				classAverage: isNaN(promoAvg) ? null : promoAvg,
 				coefficient: grade.coefficient
@@ -512,17 +521,28 @@
 					return i > 0 ? name.slice(0, i) : name;
 				};
 				const baseCounts = /* @__PURE__ */ new Map();
+				const baseCountsEn = /* @__PURE__ */ new Map();
 				for (const mark of sub.marks) {
 					const base = baseName(mark.name);
+					const baseEn = baseName(mark.nameEn || mark.name);
 					baseCounts.set(base, (baseCounts.get(base) || 0) + 1);
+					baseCountsEn.set(baseEn, (baseCountsEn.get(baseEn) || 0) + 1);
 				}
 				for (const mark of sub.marks) {
 					const base = baseName(mark.name);
-					if (baseCounts.get(base) < 2) continue;
-					mark._group = base;
-					if (mark.name === base) {
+					const baseEn = baseName(mark.nameEn || mark.name);
+					const grouped = baseCounts.get(base) >= 2;
+					const groupedEn = baseCountsEn.get(baseEn) >= 2;
+					if (!grouped && !groupedEn) continue;
+					if (grouped) mark._group = base;
+					if (groupedEn) mark._groupEn = baseEn;
+					if (grouped && mark.name === base) {
 						const parsed = parseExamCode(mark._code);
 						mark.name = parsed?.evalType ? EVAL_LABELS[parsed.evalType] || parsed.evalType : base;
+					}
+					if (groupedEn && mark.nameEn === baseEn) {
+						const parsed = parseExamCode(mark._code);
+						mark.nameEn = parsed?.evalType ? EVAL_LABELS_EN[parsed.evalType] || parsed.evalType : baseEn;
 					}
 				}
 			}
@@ -844,7 +864,7 @@
 	//#region package.json
 	var version;
 	var init_package = __esmMin((() => {
-		version = "1.9.9";
+		version = "1.9.10";
 	}));
 	//#endregion
 	//#region src/app.js
@@ -1510,137 +1530,6 @@
 		_tooltip = null;
 	}));
 	//#endregion
-	//#region src/render/components.js
-	function renderComboBox(name, values, currentValue, onUpdate) {
-		const wrapper = h("div", { class: "combo-box" });
-		const selected = (values.find((v) => v.value === currentValue) || { name: "..." }).name;
-		const box = h("div", { class: "box clickable" });
-		const setBoxContent = (text) => {
-			box.textContent = "";
-			box.append(text + " ");
-			const arrow = html("span", {}, combo_box_arrow_default);
-			box.appendChild(arrow.firstElementChild || arrow);
-		};
-		setBoxContent(selected);
-		let opened = false;
-		let choicesEl = null;
-		const close = () => {
-			opened = false;
-			box.classList.remove("opened");
-			choicesEl?.remove();
-			choicesEl = null;
-		};
-		box.addEventListener("click", () => {
-			if (opened) return close();
-			opened = true;
-			box.classList.add("opened");
-			choicesEl = h("div", { class: "choices card" }, ...values.map((choice) => h("div", {
-				class: "choice clickable opaque",
-				onclick: () => {
-					close();
-					setBoxContent(choice.name);
-					onUpdate(choice);
-				}
-			}, choice.name)));
-			wrapper.appendChild(choicesEl);
-		});
-		document.addEventListener("click", (e) => {
-			if (opened && !wrapper.contains(e.target)) close();
-		});
-		wrapper.append(h("span", { class: "name" }, name), box);
-		return wrapper;
-	}
-	function renderUpdate(upd) {
-		const hasValue = upd.value === 0 || upd.value;
-		const hasOld = upd.old === 0 || upd.old;
-		const displayValue = hasValue ? upd.value : upd.old;
-		const targetLabel = upd.type.includes("average") ? "moyenne" : "note";
-		const sign = signSvg(upd.type, upd.value, upd.old);
-		return h("div", { class: "update" }, h("div", { class: "point big" }), h("div", { class: "top" }, h("div", { class: "id" }, upd.subject), h("div", { class: "dash" }, "-"), h("div", { class: "name" }, upd.name + "\xA0", html("span", { class: "target" }, `\u00b7\u00a0 ${targetLabel}`))), h("div", { class: "mark" }, h("div", { class: "point" }), ...hasValue && hasOld ? [h("div", { class: "from" }, formatGrade(upd.old)), html("div", { class: "update-arrow" }, update_arrow_default)] : [], h("div", { class: "to" }, gradeSpan(displayValue), "\xA0/ 20"), ...sign ? [html("div", { class: "type-sign" }, sign)] : []));
-	}
-	function renderSubject(subject, moduleId) {
-		const rawCode = (subject.id.startsWith(moduleId + "_") ? subject.id.slice(moduleId.length + 1) : subject.id).replace(/_/g, " ");
-		const fullName = subject.name !== subject.id.replace(/_/g, " ") ? subject.name : null;
-		const useNameAsLabel = fullName && rawCode.length < 5 && fullName.length <= 16;
-		const codeLabel = useNameAsLabel ? fullName : rawCode;
-		const metaParts = [];
-		if (subject.classAverage != null) metaParts.push(`promo: ${formatGrade(subject.classAverage)}`);
-		if (!subject._overridden && subject.coefficient != null && subject.coefficient !== 1) metaParts.push(`coeff. ${formatGrade(subject.coefficient)}`);
-		const bottomChildren = [h("div", { class: "average" }, gradeSpan(subject.average), "\xA0/ 20")];
-		if (metaParts.length || subject._overridden) {
-			const metaChildren = [];
-			if (metaParts.length) metaChildren.push(`(${metaParts.join(", ")})`);
-			if (subject._overridden) metaChildren.push(h("span", { class: "coeff-badge coef" }, `coef. ${subject.coefficient}`));
-			bottomChildren.push(h("div", { class: "class-average" }, ...metaChildren));
-		}
-		const info = h("div", { class: "info" }, h("div", { class: "top" }, h("div", { class: "id" }, copyCodeEl(subject._code, codeLabel))), h("div", { class: "bottom" }, ...bottomChildren), h("hr", { class: "bottom-line" }));
-		function renderMark(mark) {
-			const meta = [];
-			if (mark.classAverage != null) meta.push(`moyenne: ${formatGrade(mark.classAverage)}`);
-			if (!hasEqualCoefficients(subject) && !mark._overridden) meta.push(`${Math.round(mark.coefficient * 100)}%`);
-			const hasOverride = mark._overridden && mark._rawCoefficient != null;
-			let markName = mark.name;
-			const prefix = mark._group || fullName;
-			if (prefix) {
-				if (markName.startsWith(prefix + " - ")) markName = markName.slice(prefix.length + 3);
-				else if (markName.startsWith(prefix + " ")) markName = markName.slice(prefix.length + 1);
-			}
-			const markChildren = [h("div", { class: "point" }), h("div", { class: "line" }, h("div", { class: "name" }, copyCodeEl(mark._code, markName)), "\xA0:\xA0", h("div", { class: "value" }, h("span", {
-				class: "itself",
-				style: { color: gradeColor(mark.value) }
-			}, formatGrade(mark.value)), "\xA0/ 20"))];
-			if (meta.length || hasOverride) {
-				const metaChildren = [];
-				if (meta.length) metaChildren.push(h("span", { class: "parenthesis" }, "("), meta.join(", "), h("span", { class: "parenthesis" }, ")"));
-				if (hasOverride) metaChildren.push(h("span", { class: "coeff-badge coef" }, `coef. ${mark._rawCoefficient}`));
-				markChildren.push(h("div", { class: "class-average" }, ...metaChildren));
-			}
-			return h("div", { class: "mark" }, ...markChildren);
-		}
-		const marksContent = [];
-		let lastGroup = null;
-		for (const mark of subject.marks) {
-			if (mark._group && mark._group !== lastGroup) {
-				marksContent.push(h("div", { class: "marks-title" }, mark._group));
-				lastGroup = mark._group;
-			}
-			marksContent.push(renderMark(mark));
-		}
-		return h("div", { class: "subject card" }, info, subject.marks.length === 0 ? h("div", { class: "no-marks" }, "Aucune note") : h("div", { class: "marks" }, ...fullName && !useNameAsLabel && !lastGroup ? [h("div", { class: "marks-title" }, fullName)] : [], ...marksContent));
-	}
-	function renderFooter() {
-		const resetLink = h("a", {
-			href: "#",
-			onclick: (e) => {
-				e.preventDefault();
-				localStorage.clear();
-				window.location.reload();
-			}
-		}, "Reset");
-		return h("div", { id: "footer" }, h("div", { id: "links" }, h("a", {
-			href: "#",
-			onclick: (e) => {
-				e.preventDefault();
-				window.print();
-			}
-		}, "Exporter PDF"), "\xA0·\xA0", h("a", {
-			href: `${app.repository}/tree/master/coefficients`,
-			target: "_blank"
-		}, "Coefficients"), "\xA0·\xA0", h("a", {
-			href: app.repository,
-			target: "_blank"
-		}, "Sources"), "\xA0·\xA0", resetLink), h("p", { class: "subtext" }, h("span", {}, `${app.name} v${app.version} \u00a9 ${(/* @__PURE__ */ new Date()).getFullYear()} KazeTachinuu`), h("br"), h("span", {}, "Licensed under "), h("a", {
-			class: "link colored",
-			href: `${app.repository}/blob/master/LICENSE`,
-			target: "_blank"
-		}, "MIT License")));
-	}
-	var init_components = __esmMin((() => {
-		init_app$1();
-		init_dom();
-		init_tooltip();
-	}));
-	//#endregion
 	//#region src/i18n.js
 	/** Resolve a dotted key against an explicit language; falls back to the key on miss. */
 	function tFor(lang, key, ...args) {
@@ -1890,6 +1779,141 @@
 		if (hasDocument) try {
 			document.documentElement.setAttribute("lang", currentLang);
 		} catch {}
+	}));
+	//#endregion
+	//#region src/render/components.js
+	function renderComboBox(name, values, currentValue, onUpdate) {
+		const wrapper = h("div", { class: "combo-box" });
+		const selected = (values.find((v) => v.value === currentValue) || { name: "..." }).name;
+		const box = h("div", { class: "box clickable" });
+		const setBoxContent = (text) => {
+			box.textContent = "";
+			box.append(text + " ");
+			const arrow = html("span", {}, combo_box_arrow_default);
+			box.appendChild(arrow.firstElementChild || arrow);
+		};
+		setBoxContent(selected);
+		let opened = false;
+		let choicesEl = null;
+		const close = () => {
+			opened = false;
+			box.classList.remove("opened");
+			choicesEl?.remove();
+			choicesEl = null;
+		};
+		box.addEventListener("click", () => {
+			if (opened) return close();
+			opened = true;
+			box.classList.add("opened");
+			choicesEl = h("div", { class: "choices card" }, ...values.map((choice) => h("div", {
+				class: "choice clickable opaque",
+				onclick: () => {
+					close();
+					setBoxContent(choice.name);
+					onUpdate(choice);
+				}
+			}, choice.name)));
+			wrapper.appendChild(choicesEl);
+		});
+		document.addEventListener("click", (e) => {
+			if (opened && !wrapper.contains(e.target)) close();
+		});
+		wrapper.append(h("span", { class: "name" }, name), box);
+		return wrapper;
+	}
+	function renderUpdate(upd) {
+		const hasValue = upd.value === 0 || upd.value;
+		const hasOld = upd.old === 0 || upd.old;
+		const displayValue = hasValue ? upd.value : upd.old;
+		const targetLabel = upd.type.includes("average") ? "moyenne" : "note";
+		const sign = signSvg(upd.type, upd.value, upd.old);
+		return h("div", { class: "update" }, h("div", { class: "point big" }), h("div", { class: "top" }, h("div", { class: "id" }, upd.subject), h("div", { class: "dash" }, "-"), h("div", { class: "name" }, upd.name + "\xA0", html("span", { class: "target" }, `\u00b7\u00a0 ${targetLabel}`))), h("div", { class: "mark" }, h("div", { class: "point" }), ...hasValue && hasOld ? [h("div", { class: "from" }, formatGrade(upd.old)), html("div", { class: "update-arrow" }, update_arrow_default)] : [], h("div", { class: "to" }, gradeSpan(displayValue), "\xA0/ 20"), ...sign ? [html("div", { class: "type-sign" }, sign)] : []));
+	}
+	function renderSubject(subject, moduleId) {
+		const lang = getLang();
+		const subjectName = lang === "en" ? subject.nameEn || subject.name : subject.name;
+		const rawCode = (subject.id.startsWith(moduleId + "_") ? subject.id.slice(moduleId.length + 1) : subject.id).replace(/_/g, " ");
+		const fullName = subjectName !== subject.id.replace(/_/g, " ") ? subjectName : null;
+		const useNameAsLabel = fullName && rawCode.length < 5 && fullName.length <= 16;
+		const codeLabel = useNameAsLabel ? fullName : rawCode;
+		const metaParts = [];
+		if (subject.classAverage != null) metaParts.push(t("badges.promoMeta", formatGrade(subject.classAverage)));
+		if (!subject._overridden && subject.coefficient != null && subject.coefficient !== 1) metaParts.push(t("badges.coeffMeta", formatGrade(subject.coefficient)));
+		const bottomChildren = [h("div", { class: "average" }, gradeSpan(subject.average), "\xA0/ 20")];
+		if (metaParts.length || subject._overridden) {
+			const metaChildren = [];
+			if (metaParts.length) metaChildren.push(`(${metaParts.join(", ")})`);
+			if (subject._overridden) metaChildren.push(h("span", { class: "coeff-badge coef" }, t("badges.coef", subject.coefficient)));
+			bottomChildren.push(h("div", { class: "class-average" }, ...metaChildren));
+		}
+		const info = h("div", { class: "info" }, h("div", { class: "top" }, h("div", { class: "id" }, copyCodeEl(subject._code, codeLabel))), h("div", { class: "bottom" }, ...bottomChildren), h("hr", { class: "bottom-line" }));
+		function renderMark(mark) {
+			const meta = [];
+			if (mark.classAverage != null) meta.push(t("badges.avgMeta", formatGrade(mark.classAverage)));
+			if (!hasEqualCoefficients(subject) && !mark._overridden) meta.push(`${Math.round(mark.coefficient * 100)}%`);
+			const hasOverride = mark._overridden && mark._rawCoefficient != null;
+			let markName = lang === "en" ? mark.nameEn || mark.name : mark.name;
+			const prefix = (lang === "en" ? mark._groupEn || mark._group : mark._group) || fullName;
+			if (prefix) {
+				if (markName.startsWith(prefix + " - ")) markName = markName.slice(prefix.length + 3);
+				else if (markName.startsWith(prefix + " ")) markName = markName.slice(prefix.length + 1);
+			}
+			const markChildren = [h("div", { class: "point" }), h("div", { class: "line" }, h("div", { class: "name" }, copyCodeEl(mark._code, markName)), "\xA0:\xA0", h("div", { class: "value" }, h("span", {
+				class: "itself",
+				style: { color: gradeColor(mark.value) }
+			}, formatGrade(mark.value)), "\xA0/ 20"))];
+			if (meta.length || hasOverride) {
+				const metaChildren = [];
+				if (meta.length) metaChildren.push(h("span", { class: "parenthesis" }, "("), meta.join(", "), h("span", { class: "parenthesis" }, ")"));
+				if (hasOverride) metaChildren.push(h("span", { class: "coeff-badge coef" }, t("badges.coef", mark._rawCoefficient)));
+				markChildren.push(h("div", { class: "class-average" }, ...metaChildren));
+			}
+			return h("div", { class: "mark" }, ...markChildren);
+		}
+		const marksContent = [];
+		let lastGroup = null;
+		for (const mark of subject.marks) {
+			const group = lang === "en" ? mark._groupEn || mark._group : mark._group;
+			if (group && group !== lastGroup) {
+				marksContent.push(h("div", { class: "marks-title" }, group));
+				lastGroup = group;
+			}
+			marksContent.push(renderMark(mark));
+		}
+		return h("div", { class: "subject card" }, info, subject.marks.length === 0 ? h("div", { class: "no-marks" }, t("marks.none")) : h("div", { class: "marks" }, ...fullName && !useNameAsLabel && !lastGroup ? [h("div", { class: "marks-title" }, fullName)] : [], ...marksContent));
+	}
+	function renderFooter() {
+		const resetLink = h("a", {
+			href: "#",
+			onclick: (e) => {
+				e.preventDefault();
+				localStorage.clear();
+				window.location.reload();
+			}
+		}, t("footer.reset"));
+		return h("div", { id: "footer" }, h("div", { id: "links" }, h("a", {
+			href: "#",
+			onclick: (e) => {
+				e.preventDefault();
+				window.print();
+			}
+		}, t("footer.exportPdf")), "\xA0·\xA0", h("a", {
+			href: `${app.repository}/tree/master/coefficients`,
+			target: "_blank"
+		}, "Coefficients"), "\xA0·\xA0", h("a", {
+			href: app.repository,
+			target: "_blank"
+		}, t("footer.sources")), "\xA0·\xA0", resetLink), h("p", { class: "subtext" }, h("span", {}, `${app.name} v${app.version} \u00a9 ${(/* @__PURE__ */ new Date()).getFullYear()} KazeTachinuu`), h("br"), h("span", {}, t("footer.licensed")), h("a", {
+			class: "link colored",
+			href: `${app.repository}/blob/master/LICENSE`,
+			target: "_blank"
+		}, "MIT License")));
+	}
+	var init_components = __esmMin((() => {
+		init_app$1();
+		init_dom();
+		init_tooltip();
+		init_i18n();
 	}));
 	//#endregion
 	//#region src/render/print.js
