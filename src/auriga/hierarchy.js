@@ -58,6 +58,7 @@ export function buildNameLookup(entries) {
     for (const entry of entries) {
         lookup.set(entry.examCode, {
             name: entry.name,
+            nameEn: entry.nameEn,
             avgPreRatt: entry.avgPreRatt,
             avgFinal: entry.avgFinal,
         });
@@ -250,14 +251,18 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
         if (!modules.has(moduleCode)) {
             const info = resolveName(moduleCode, '_' + moduleId, nameLookup);
             let name = moduleId;
+            let nameEn = moduleId;
             if (info) {
                 name = info.name.length <= 40 ? info.name : moduleId;
+                const en = info.nameEn || info.name;
+                nameEn = en.length <= 40 ? en : moduleId;
             }
             const modPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
             modules.set(moduleCode, {
                 id: moduleId,
                 _code: moduleCode,
                 name,
+                nameEn,
                 average: null,
                 classAverage: isNaN(modPromo) ? null : modPromo,
                 subjects: new Map(),
@@ -269,10 +274,12 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
         if (!mod.subjects.has(subject.code)) {
             const info = resolveName(subject.code, '_' + subject.id, nameLookup);
             const subPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
+            const fallbackName = subject.id.replace(/_/g, ' ');
             mod.subjects.set(subject.code, {
                 id: subject.id,
                 _code: subject.code,
-                name: info ? info.name : subject.id.replace(/_/g, ' '),
+                name: info ? info.name : fallbackName,
+                nameEn: info ? (info.nameEn || info.name) : fallbackName,
                 average: null,
                 classAverage: isNaN(subPromo) ? null : subPromo,
                 coefficient: 1,

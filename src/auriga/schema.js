@@ -102,6 +102,7 @@ export function parseSynthesisLine(line) {
     return {
         examCode,
         name: caption.fr || caption.en || examCode,
+        nameEn: caption.en || caption.fr || examCode,
         avgPreRatt: line[SYNTHESIS.avgPreRatt],
         avgFinal: line[SYNTHESIS.avgFinal],
     };

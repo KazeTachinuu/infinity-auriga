@@ -8,6 +8,7 @@ import { copyCodeEl } from './tooltip.js';
 import { renderComboBox, renderUpdate, renderSubject, renderFooter } from './components.js';
 import { renderPrintView } from './print.js';
 import { checkForUpdate } from '../version-check.js';
+import { t, tFor, getLang, setLang, availableLangs } from '../i18n.js';
 
 const ExportSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>';
 const UpdateSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>';
@@ -21,37 +22,37 @@ function createApiErrorPanel(error, hasCachedData) {
 
     let hint = '';
     if (message.includes('Menu entries not found') || message.includes('menu')) {
-        hint = 'Le format du menu Auriga a peut-être changé. ';
+        hint = t('errors.menuChanged');
     } else if (message.includes('API error') || message.includes('fetch')) {
-        hint = 'Le serveur Auriga ne répond pas correctement. ';
+        hint = t('errors.apiDown');
     } else if (message.includes('access token') || message.includes('401')) {
-        hint = 'Votre session a expiré. ';
+        hint = t('errors.sessionExpired');
     } else if (message.includes('API format changed') || message.includes('parse')) {
-        hint = 'Le format des données Auriga a changé. ';
+        hint = t('errors.formatChanged');
     }
 
     const desc = hasCachedData
-        ? hint + 'Vos notes en cache sont affichées à droite, mais elles peuvent être obsolètes.'
-        : hint + 'Essayez de recharger la page. Si le problème persiste, signalez-le.';
+        ? hint + t('errors.cachedSuffix')
+        : hint + t('errors.retrySuffix');
 
-    const reportUrl = `${app.repository}/issues/new?title=${encodeURIComponent('Erreur: ' + message.substring(0, 80))}&body=${encodeURIComponent('## Erreur\n```\n' + message + '\n```\n\n## Contexte\n- Version: ' + app.version + '\n- URL: ' + window.location.href + '\n- Date: ' + new Date().toISOString())}`;
+    const reportUrl = `${app.repository}/issues/new?title=${encodeURIComponent(t('errors.issueTitlePrefix') + message.substring(0, 80))}&body=${encodeURIComponent(t('errors.issueBodyError') + '\n```\n' + message + '\n```\n\n' + t('errors.issueBodyContext') + '\n- Version: ' + app.version + '\n- URL: ' + window.location.href + '\n- Date: ' + new Date().toISOString())}`;
 
     return h('div', { class: 'api-error-panel' },
-        h('div', { class: 'api-error-title' }, 'Oups, quelque chose a cassé'),
+        h('div', { class: 'api-error-title' }, t('errors.title')),
         h('div', { class: 'api-error-desc' }, desc),
         h('pre', { class: 'api-error-box' }, message),
         h('div', { class: 'api-error-actions' },
             h('button', {
                 class: 'api-error-btn primary',
                 onclick: () => window.location.reload(),
-            }, 'Recharger'),
+            }, t('errors.reload')),
             h('a', {
                 href: reportUrl, target: '_blank', class: 'api-error-btn',
-            }, 'Signaler'),
+            }, t('errors.report')),
             h('button', {
                 class: 'api-error-btn muted',
                 onclick: () => { localStorage.clear(); window.location.reload(); },
-            }, 'Reset cache'),
+            }, t('errors.resetCache')),
         )
     );
 }
@@ -65,12 +66,29 @@ function createCopyTemplateBtn({ content }) {
         onclick: (e) => {
             e.preventDefault();
             navigator.clipboard.writeText(content).then(() => {
-                btn.textContent = 'Copié !';
+                btn.textContent = t('coeff.copied');
                 btn.classList.add('coeff-copied');
             });
         }
-    }, 'Copier les codes');
+    }, t('coeff.copyCodes'));
     return btn;
+}
+
+/**
+ * Compact FR | EN segmented toggle. setLang triggers all subscribers,
+ * which includes boot.js's re-render of the whole app.
+ */
+function renderLangToggle() {
+    const current = getLang();
+    return h('div', { class: 'lang-toggle', role: 'group', 'aria-label': 'Language' },
+        ...availableLangs().map(code =>
+            h('button', {
+                class: 'lang-btn' + (code === current ? ' active' : ''),
+                onclick: () => setLang(code),
+                'aria-pressed': code === current ? 'true' : 'false',
+            }, code.toUpperCase())
+        )
+    );
 }
 
 export function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange }) {
@@ -91,23 +109,24 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
     const visibleUpdates = updates.filter(u => u.type !== 'average-update');
 
     const avgEntries = [
-        { label: 'Etudiant', value: averages.student, colored: true },
-        { label: 'Promotion', value: averages.promo, colored: false },
+        { label: t('loading.student'), value: averages.student, colored: true },
+        { label: t('sidebar.promotion'), value: averages.promo, colored: false },
     ];
 
     const moduleEls = marks.flatMap(mod => {
         const modOverriddenEl = mod._overridden
-            ? h('span', { class: 'coeff-badge ects' }, `${mod.coefficient} ECTS`)
+            ? h('span', { class: 'coeff-badge ects' }, t('badges.ects', mod.coefficient))
             : null;
+        const modName = getLang() === 'en' ? (mod.nameEn || mod.name) : mod.name;
         return [
         h('div', { class: 'header module' },
             h('div', { class: 'text' },
-                h('div', { class: 'name' }, copyCodeEl(mod._code, mod.name)),
+                h('div', { class: 'name' }, copyCodeEl(mod._code, modName)),
                 h('div', { class: 'point' }),
                 h('div', { class: 'bottom' },
                     h('span', { class: 'average', style: { color: gradeColor(mod.average) } }, formatGrade(mod.average)),
-                    h('span', { class: 'max' }, '\u00a0/ 20'),
-                    ...(mod.classAverage != null ? [h('span', { class: 'class-average' }, `(promo: ${formatGrade(mod.classAverage)})`)] : []),
+                    h('span', { class: 'max' }, ' / 20'),
+                    ...(mod.classAverage != null ? [h('span', { class: 'class-average' }, `(${t('badges.promoMeta', formatGrade(mod.classAverage))})`)] : []),
                     ...(modOverriddenEl ? [modOverriddenEl] : [])
                 )
             ),
@@ -116,18 +135,35 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
         ...mod.subjects.map(s => renderSubject(s, mod.id))
     ];});
 
+    // Swap the rendered print view + filename for the requested language, then print.
+    // Browsers use document.title as the default "Save as PDF" filename.
+    const printAs = (lang) => {
+        if (!hasCachedData) { window.print(); return; }
+        const existing = document.getElementById('print-view');
+        if (existing) existing.remove();
+        container.appendChild(renderPrintView(marks, averages, coeffMeta, name, lang));
+        const parts = [tFor(lang, 'print.filenameBase')];
+        if (coeffMeta?.semester) parts.push(coeffMeta.semester);
+        if (name) parts.push(name);
+        document.title = parts.join(' — ');
+        window.print();
+    };
+
     // Right side: content panel
     container.appendChild(h('div', { id: 'content', class: 'variable wide' },
         h('div', { id: 'header' },
             html('div', { id: 'logo', class: 'variable' }, LogoSvg),
             ...(name ? [h('div', { class: 'header-actions' },
+                renderLangToggle(),
                 h('a', { id: 'update-btn', style: { display: 'none' } }),
-                h('a', { id: 'export-btn', href: '#', onclick: (e) => { e.preventDefault(); window.print(); } },
-                    html('span', { class: 'export-icon' }, ExportSvg), 'PDF'),
+                h('a', { id: 'export-btn', href: '#', onclick: (e) => { e.preventDefault(); printAs('fr'); } },
+                    html('span', { class: 'export-icon' }, ExportSvg), t('header.exportFr')),
+                h('a', { id: 'export-btn-en', href: '#', onclick: (e) => { e.preventDefault(); printAs('en'); } },
+                    html('span', { class: 'export-icon' }, ExportSvg), t('header.exportEn')),
                 h('a', { id: 'logout', href: '#', onclick: (e) => {
                     e.preventDefault();
                     window.location.href = 'https://ionisepita-auth.np-auriga.nfrance.net/auth/realms/npionisepita/protocol/openid-connect/logout?post_logout_redirect_uri=' + encodeURIComponent('https://auriga.epita.fr');
-                } }, 'Se deconnecter'),
+                } }, t('header.logout')),
             )] : [])
         ),
         h('div', { id: 'main' },
@@ -139,12 +175,12 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                             if (f.id === 'semester') onSemesterChange(choice.value);
                         }))
                     ),
-                    h('div', { class: 'header' }, 'Derniers changements', h('hr')),
+                    h('div', { class: 'header' }, t('sidebar.changes'), h('hr')),
                     ...(visibleUpdates.length === 0
-                        ? [h('div', { class: 'no-updates' }, 'Aucun changement depuis votre derniere visite.')]
+                        ? [h('div', { class: 'no-updates' }, t('sidebar.noChanges'))]
                         : []),
                     h('div', { class: 'updates' }, ...visibleUpdates.map(renderUpdate)),
-                    h('div', { class: 'header' }, 'Moyennes', h('hr')),
+                    h('div', { class: 'header' }, t('sidebar.averages'), h('hr')),
                     h('div', { class: 'big-list' }, ...avgEntries.map(e =>
                         h('div', { class: 'entry' },
                             h('div', { class: 'point' }),
@@ -152,7 +188,7 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                             h('div', { class: 'point small' }),
                             h('div', { class: 'mark' },
                                 h('span', { class: 'value', style: { color: e.colored ? gradeColor(e.value) : 'auto' } }, formatGrade(e.value)),
-                                '\u00a0/ 20'
+                                ' / 20'
                             )
                         )
                     )),
@@ -160,8 +196,8 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                 // Grade content or empty state
                 ...(!hasCachedData && apiError
                     ? [h('div', { class: 'empty-state' },
-                        h('div', { class: 'empty-state-text' }, 'Aucune note en cache'),
-                        h('div', { class: 'empty-state-hint' }, 'Les notes seront disponibles ici une fois la connexion rétablie.')
+                        h('div', { class: 'empty-state-text' }, t('errors.noCachedTitle')),
+                        h('div', { class: 'empty-state-hint' }, t('empty.hint'))
                     )]
                     : [
                         ...(coeffMeta ? [
@@ -178,8 +214,8 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                                 h('div', { class: 'point' }),
                                 h('div', { class: 'coeff-content' },
                                     coeffSource
-                                        ? h('span', {}, 'Coefficients corrigés par la communauté')
-                                        : h('span', {}, 'Coefficients non corrigés ', h('span', { class: 'coeff-muted' }, '(Auriga les considère tous égaux)'))
+                                        ? h('span', {}, t('coeff.corrected'))
+                                        : h('span', {}, t('coeff.uncorrected'), h('span', { class: 'coeff-muted' }, t('coeff.uncorrectedHint')))
                                 )
                             ),
                             h('div', { class: 'coeff-links' },
@@ -188,12 +224,12 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
                                         h('a', { href: import.meta.env.DEV
                                             ? `/coefficients/${coeffSource}`
                                             : `${app.repository}/blob/master/coefficients/${coeffSource}`,
-                                            target: '_blank', class: 'link colored' }, 'Voir la source'),
-                                        ...(coeffTemplate ? ['\u00a0\u00b7\u00a0', createCopyTemplateBtn(coeffTemplate)] : []),
+                                            target: '_blank', class: 'link colored' }, t('coeff.viewSource')),
+                                        ...(coeffTemplate ? [' · ', createCopyTemplateBtn(coeffTemplate)] : []),
                                     ]
                                     : [
-                                        ...(coeffTemplate ? [createCopyTemplateBtn(coeffTemplate), '\u00a0\u00b7\u00a0'] : []),
-                                        h('a', { href: `${app.repository}/tree/master/coefficients`, target: '_blank', class: 'link colored' }, 'Contribuer'),
+                                        ...(coeffTemplate ? [createCopyTemplateBtn(coeffTemplate), ' · '] : []),
+                                        h('a', { href: `${app.repository}/tree/master/coefficients`, target: '_blank', class: 'link colored' }, t('coeff2.contribute')),
                                     ]
                                 )
                             )
@@ -207,11 +243,11 @@ export function renderApp(container, { name, marks, averages, filters, filtersVa
         renderFooter()
     ));
 
-    // Dedicated print view — hidden on screen, shown only in @media print
+    // Dedicated print view — hidden on screen, shown only in @media print.
+    // Rendered with the current global lang; printAs() re-renders it on demand.
     if (hasCachedData) {
         container.appendChild(renderPrintView(marks, averages, coeffMeta, name));
-        // Set page title for PDF filename (browsers use document.title as default save name)
-        const parts = ['Bulletin'];
+        const parts = [t('print.filenameBase')];
         if (coeffMeta?.semester) parts.push(coeffMeta.semester);
         if (name) parts.push(name);
         document.title = parts.join(' — ');
