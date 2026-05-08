@@ -13,7 +13,7 @@
 // @downloadURL  https://raw.githubusercontent.com/KazeTachinuu/infinity-auriga/master/dist-userscript/infinity-auriga.user.js
 // ==/UserScript==
 
-;(function(){if(localStorage.getItem('infinity_auriga_enabled')==='0')return;var s=document.createElement('style');s.setAttribute('data-infinity','1');s.textContent="*,*:before,*:after{box-sizing:border-box}body{margin:0;overflow:hidden}div{display:flex}div,hr{box-sizing:border-box}button{outline:none;border:none;background:none}a{color:inherit;text-decoration:inherit}:root{--bg-dark: #343D55;--bg-darker: #151925;--text-primary: #151925;--text-muted: #868DA0;--text-meta: #909090;--surface: #FFFFFF;--surface-alt: #F3F4F5;--dot-color: #D5D9DC;--accent: #3D69ED;--radius: 6px;--content-px: clamp(25px, 5vw, 75px);--font-header: clamp(20px, 3vw, 32px);--font-body: clamp(13px, 1.5vw, 18px);-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}#app{height:100dvh}button,a,.clickable{cursor:pointer;user-select:none;transition:opacity .15s}button:not(.opaque):hover,a:not(.opaque):hover,.clickable:not(.opaque):hover{opacity:.8}button:not(.opaque):active,a:not(.opaque):active,.clickable:not(.opaque):active{opacity:.6}.subtext{color:var(--text-muted);font-size:clamp(13px,1.5vw,16px);line-height:22px;text-align:center}.link.colored{color:var(--accent)}.card{border-radius:var(--radius);box-shadow:#00000026 0 2px 8px;transition:all .2s}.card.clickable:hover{box-shadow:#00000040 0 2px 9px;transform:translateY(-1px)}.variable{transition:width .6s cubic-bezier(.65,0,.35,1),margin .6s cubic-bezier(.65,0,.35,1)}.class-average{color:var(--text-meta)}.point{flex-shrink:0;width:8px;height:8px;background-color:var(--dot-color);border-radius:50%}.point.big{width:10px;height:10px}.point.small{width:6px;height:6px}#background{position:relative;z-index:1;width:clamp(200px,30vw,450px);flex-shrink:0;overflow:hidden;background:linear-gradient(-212deg,var(--bg-dark) 0%,var(--bg-darker) 95%)}.triangle{position:absolute}#top-triangle{top:-175px;left:-175px;width:500px;filter:drop-shadow(3px 3px 15px rgba(0,0,0,.25))}#bottom-triangle{bottom:-75px;right:-100px;width:600px;filter:drop-shadow(-3px -3px 15px rgba(0,0,0,.25))}#content{flex-direction:column;justify-content:space-between;align-items:center;z-index:2;flex:1;min-width:0;padding:35px 0;overflow-y:auto;background-color:var(--surface)}#content.wide #header #logo{width:300px;margin:0}#header{width:100%;padding:20px var(--content-px);justify-content:space-between;align-items:center;flex-shrink:0;overflow:hidden}#header #logo{flex-shrink:0;width:400px;margin-top:25px;margin-left:12.5px}#header #logo svg{width:100%;height:auto}.header-actions{align-items:center;gap:clamp(12px,2vw,20px)}#export-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--surface-alt);color:var(--text-primary);font-size:clamp(13px,1.5vw,16px);font-weight:600;transition:background .15s,opacity .15s}#export-btn:hover{background:var(--dot-color)}.export-icon{display:flex;align-items:center}.export-icon svg{width:clamp(14px,1.5vw,18px);height:auto}#update-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--accent);color:#fff;font-size:clamp(13px,1.5vw,16px);font-weight:600;transition:background .15s,opacity .15s}#update-btn:hover{opacity:.85}.update-icon{display:flex;align-items:center}.update-icon svg{width:clamp(14px,1.5vw,18px);height:auto}#header #logout{color:#251515;font-size:clamp(16px,2vw,22px);font-weight:500}#footer{flex-direction:column;flex-shrink:0}#footer #links{justify-content:center;margin-bottom:8px;font-weight:500;font-size:clamp(16px,2vw,22px);color:var(--text-primary)}#main{flex-direction:column;flex-grow:1;justify-content:center;width:100%}.loading{flex-direction:column;align-items:center;padding:0 var(--content-px)}.loading-step{margin-top:clamp(20px,4vw,40px);font-size:clamp(16px,2vw,20px);font-weight:600;color:var(--text-primary);text-align:center}.loading-request{margin-top:6px;min-height:1.4em;max-width:100%;font-size:clamp(11px,1.2vw,13px);font-family:SF Mono,Cascadia Code,Fira Code,monospace;color:var(--text-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:0;transition:opacity .15s}.loading-request:not(:empty){opacity:1}.loading-quote{margin-top:clamp(25px,4vw,40px);font-size:clamp(13px,1.4vw,15px);font-style:italic;color:var(--text-muted);text-align:center;opacity:.6}.spinner{width:clamp(60px,8vw,85px);animation:spin .75s linear infinite}.spinner svg{width:100%;height:100%}@keyframes spin{to{transform:rotate(360deg)}}.content{flex-direction:column;flex-grow:1;align-items:flex-start;padding:5px var(--content-px);margin-bottom:25px;overflow-y:auto}.header{flex-direction:column;position:relative;font-weight:700;font-size:var(--font-header)}.header hr{width:100%;border-bottom:0;border-color:var(--surface);position:relative;z-index:-1}.filters{justify-content:space-between;width:100%;margin-bottom:clamp(30px,4vw,50px)}.combo-box{flex-direction:column;position:relative}.combo-box .name{height:20px;margin-bottom:clamp(5px,1vw,8px);margin-left:1px;color:#343434;font-size:clamp(14px,1.5vw,16px)}.combo-box .box{justify-content:space-between;align-items:center;min-width:clamp(200px,30vw,400px);height:clamp(32px,4vw,40px);padding:0 12px;border-radius:var(--radius);background-color:var(--surface-alt);font-size:clamp(12px,1.5vw,16px)}.combo-box .box svg{height:clamp(8px,1vw,10px);margin-top:2px;transition:transform .125s}.combo-box .box.opened svg{transform:rotate(180deg)}.combo-box .choices{flex-direction:column;position:absolute;top:75px;z-index:2;width:100%;background-color:var(--surface);border-radius:var(--radius);font-size:clamp(12px,1.5vw,16px)}.combo-box .choices .choice{padding:8px 12px;transition:background-color .15s}.combo-box .choices .choice:hover{background-color:#0000000d}.combo-box .choices .choice:active{background-color:#0000001a}.combo-box .choices .choice:first-child{border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}.combo-box .choices .choice:last-child{border-bottom-left-radius:var(--radius);border-bottom-right-radius:var(--radius)}.no-updates{margin-bottom:20px;font-size:var(--font-body)}.updates{flex-direction:column;width:100%;margin-bottom:15px}.updates .update{align-items:center;margin-bottom:10px;padding-left:35px;font-size:clamp(18px,2.5vw,28px)}.updates .update .top{align-items:center}.updates .update .top .id{margin-left:15px;margin-right:10px;font-weight:700}.updates .update .top .dash{margin-right:10px;font-size:clamp(18px,2vw,24px)}.updates .update .top .name{font-size:var(--font-body);margin-right:10px}.updates .update .top .name .target{font-weight:500}.updates .update .mark{align-items:center;margin-bottom:1px;font-weight:500}.updates .update .mark .point{margin-left:2px;margin-right:12px}.updates .update .mark .from{color:#a5a9b5;text-decoration:line-through}.updates .update .mark .update-arrow{margin:0 10px}.updates .update .mark .type-sign{margin-left:12px;margin-bottom:2px}.updates .update .mark .type-sign svg{width:30px}.big-list{flex-direction:column;margin-bottom:20px;padding-top:5px;transition:opacity .15s}.big-list .entry{align-items:center;margin-bottom:12px;padding-left:clamp(15px,3vw,35px);font-size:clamp(18px,2.8vw,26px)}.big-list .entry .name{margin-left:12px;margin-right:10px}.big-list .entry .mark{margin-left:10px}.big-list .entry .mark .value{font-weight:700}.track-info{flex-direction:column}.track-info-name{font-weight:700;font-size:var(--font-header)}.track-info-detail{font-size:clamp(12px,1.4vw,15px);color:var(--text-muted);margin-top:2px}.coeff-info{flex-direction:column;margin-top:8px;padding-left:clamp(15px,3vw,35px);font-size:clamp(14px,1.8vw,18px)}.coeff-main{align-items:center;gap:12px;font-weight:500}.coeff-muted{color:var(--text-muted);font-weight:400}.coeff-links{margin-top:5px;margin-left:20px;font-size:clamp(12px,1.4vw,15px);font-weight:500}.coeff-copied{color:#44b732!important}.api-error-panel{flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;height:100%;padding:40px 30px;gap:16px;z-index:2}.api-error-title{font-size:22px;font-weight:700;color:#e34e4e}.api-error-desc{font-size:14px;color:#aaa;line-height:1.6;max-width:400px}.api-error-box{background:#1e2233;color:#ff6b6b;padding:12px 18px;border-radius:10px;font-size:11px;max-width:100%;overflow-x:auto;text-align:left;white-space:pre-wrap;word-break:break-word}.api-error-actions{gap:10px;flex-wrap:wrap;justify-content:center}.api-error-btn{padding:8px 20px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;border:1px solid #444;background:none;color:#aaa;text-decoration:none}.api-error-btn.primary{background:#fff;color:#151925;border-color:#fff}.api-error-btn.muted{color:#666;border-color:#444;font-weight:400}.api-error-btn:hover{opacity:.85}.empty-state{flex-direction:column;align-items:center;justify-content:center;width:100%;flex-grow:1;padding:60px 20px;text-align:center;gap:8px}.empty-state-text{font-size:18px;font-weight:600;color:var(--text-primary)}.empty-state-hint{font-size:14px;color:var(--text-muted)}hr.separator{width:100%;margin-top:25px;opacity:.3;border-bottom:0;border-color:var(--surface)}.header.module{max-width:100%;margin-top:50px}.header.module .text{align-items:center}.header.module .name,.header.module .average,.header.module .class-average,.header.module .max{white-space:nowrap}.header.module .name{display:inline-block;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}.header.module .point{margin:2px 10px 0}.header.module .class-average{margin-left:10px;font-weight:400}.subject{width:100%;margin:15px 0}.subject .info{flex-direction:column;align-items:center;flex-shrink:0;width:250px;padding-top:15px;padding-bottom:17px}.subject .info .top,.subject .info .bottom{display:contents}.subject .info .id{font-weight:700;font-size:24px;word-break:break-word}.subject .info .point{display:none}.subject .info .average{margin-top:10px;font-size:24px}.subject .info .average .value{font-weight:700}.subject .info .class-average{font-size:14px}.subject .info .bottom-line{display:none}.subject .marks{flex-direction:column;flex-grow:1;justify-content:center;max-width:calc(100% - 275px);padding:15px 0;font-size:16px}.subject .marks .marks-title{font-weight:600;font-size:15px;margin-bottom:6px;color:#444}.subject .marks .mark{align-items:center;max-width:100%;margin:3px 0}.subject .marks .mark .point{margin-bottom:1px}.subject .marks .mark .line{display:contents}.subject .marks .mark .name,.subject .marks .mark .value,.subject .marks .mark .class-average{white-space:nowrap}.subject .marks .mark .name{display:inline-block;margin-left:15px;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}.subject .marks .mark .value{justify-content:flex-end;margin-left:1px;font-weight:700}.subject .marks .mark .class-average{margin-left:10px}.coeff-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:4px;font-size:.7em;font-weight:600;letter-spacing:.02em;vertical-align:middle}.coeff-badge.ects{background:#e8f5e9;color:#2e7d32}.coeff-badge.coef{background:var(--surface-alt);color:var(--text-muted)}.copy-code{display:inline-block;border-bottom:1px dashed var(--dot-color)}.copy-code:hover{border-bottom-color:var(--text-muted)}.code-tooltip{position:fixed;z-index:9999;padding:5px 12px;border-radius:5px;background:var(--bg-darker);color:#e8eaed;font-size:13px;font-weight:500;letter-spacing:.3px;font-family:SF Mono,Cascadia Code,Fira Code,monospace;white-space:nowrap;pointer-events:none;box-shadow:0 4px 12px #0000004d;opacity:0;transition:opacity .12s}.code-tooltip.copied{background:var(--accent);color:#fff;font-family:inherit}.no-marks{flex-grow:1;justify-content:center;align-items:center;width:100%;font-size:28px}@media (max-width: 850px){.filters{flex-direction:column;gap:15px}.header hr{margin-top:9px}.updates{margin-top:4px;margin-bottom:12px}.updates .update{display:grid;grid-template-columns:17px 100%;margin-bottom:6px;padding-left:15px}.updates .update>.point{width:6px;height:6px}.updates .update .top .id{margin-left:0;margin-right:6px}.updates .update .top .name{display:inline-block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.updates .update .top .name .target{display:none}.updates .update .mark{grid-column:2 / 3;height:23px}.updates .update .mark .point{display:none}.updates .update .mark .update-arrow{width:20px;margin:0 6px 1px}.updates .update .mark .type-sign{width:14px;margin-left:6px;margin-bottom:2px}.header.module{margin-top:20px;margin-bottom:6px}.header.module .text{flex-direction:column;align-items:flex-start;margin-left:-1px}.header.module .text .name{max-width:100%;margin-bottom:2px;font-size:20px}.header.module .text .point{display:none}.header.module .text .bottom{align-items:center;font-size:16px}.header.module .text .bottom .class-average{margin-left:5px;font-size:14px}.header.module .bottom-line{margin-top:7px;margin-bottom:1px;opacity:.6}.subject{flex-direction:column;margin:10px 0;padding:10px 14px}.subject .no-marks{margin:4px 0;font-size:14px}.subject .info{align-items:flex-start;width:100%;padding:0}.subject .info .top,.subject .info .bottom{display:flex;align-items:center;max-width:100%}.subject .info .id{font-size:18px}.subject .info .point{display:block;width:5px;height:5px;margin:0 8px}.subject .info .average{margin:0;font-size:14px}.subject .info .class-average{margin-left:5px;font-size:12px}.subject .info .bottom-line{display:block;width:100%;border-bottom:0;border-color:var(--surface);opacity:.3}.subject .marks{max-width:100%;padding:0}.subject .marks .mark{display:grid;grid-template-columns:12px calc(100% - 5px);padding:0 5px}.subject .marks .mark .point{width:5px;height:5px;margin-top:1px}.subject .marks .mark .line{display:flex;flex-direction:row-reverse;justify-content:flex-end;font-size:13px}.subject .marks .mark .line .name{margin-left:0}.subject .marks .mark .line .value{width:auto;margin-left:0}.subject .marks .mark .class-average{grid-column:2 / 3;margin-left:0;font-size:11px}.subject .marks .mark .class-average .parenthesis{display:none}}@media (max-width: 575px){#background{display:none}#header{flex-direction:column;padding:0;justify-content:center;margin-bottom:20px}#header #logo{margin-top:15px;margin-left:0;max-width:80%}#content{padding:15px 0}hr.separator{margin-top:0;margin-bottom:5px}}@media (max-height: 650px){#header #logo{margin-top:0}#header #logo svg{height:115px}}@media (max-height: 550px){#header{margin-bottom:10px}#header #logo svg{height:100px}#header #logout{font-size:16px}}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--dot-color);border-radius:3px}#print-view{display:none}@media print{@page{size:A4 portrait;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{overflow:visible;margin:0;background:#fff}#app{height:auto;display:block}#print-view{padding:18mm 16mm!important}#background,#content,#view-switcher{display:none!important}#print-view{display:block!important;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a2e}.p-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;padding-bottom:16px;border-bottom:2.5px solid #3b6fa0}.p-header-left{display:flex;flex-direction:column;gap:1px}.p-info{font-size:11.5px;color:#555;line-height:1.5}.p-student{font-size:13px;font-weight:700;margin-top:6px;color:#1a1a2e}.p-header-right{font-size:24px;font-weight:800;color:#1a1a2e;letter-spacing:-.01em;text-align:right;flex-shrink:0;margin-left:30px}.p-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.35}.p-table th,.p-table td{padding:7px 12px;border:1px solid #c0ccd8;vertical-align:middle}.p-left{text-align:left!important}.p-col-name{width:48%}.p-col-ects{width:12%}.p-col-avg{width:20%}.p-table thead th{background:#4a7fb5!important;color:#fff!important;font-weight:700;font-size:11px;text-align:center;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px}.p-table .p-ue td{background:#d6e4f0!important;font-weight:800;text-align:center;font-size:13px;padding:9px 12px;border-color:#a8bdd2}.p-table .p-sub td{text-align:center;font-size:11.5px;padding:5px 12px}.p-table .p-sub td:first-child{padding-left:22px}.p-table .p-sub td:last-child{font-weight:700}.p-coef{margin-left:6px;font-size:9px;color:#7a8a9e;font-weight:600}.p-table .p-total td{background:#4a7fb5!important;color:#fff!important;font-weight:800;font-size:13px;text-align:center;padding:9px 12px;border-color:#3a6a9a}.p-notes{margin-top:16px;font-size:10px;color:#555;line-height:1.6}.p-footer{margin-top:12px;font-size:9px;color:#aaa;text-align:center;letter-spacing:.02em}}\n";(document.head||document.documentElement).appendChild(s)})();
+;(function(){if(localStorage.getItem('infinity_auriga_enabled')==='0')return;var s=document.createElement('style');s.setAttribute('data-infinity','1');s.textContent="*,*:before,*:after{box-sizing:border-box}body{margin:0;overflow:hidden}div{display:flex}div,hr{box-sizing:border-box}button{outline:none;border:none;background:none}a{color:inherit;text-decoration:inherit}:root{--bg-dark: #343D55;--bg-darker: #151925;--text-primary: #151925;--text-muted: #868DA0;--text-meta: #909090;--surface: #FFFFFF;--surface-alt: #F3F4F5;--dot-color: #D5D9DC;--accent: #3D69ED;--radius: 6px;--content-px: clamp(25px, 5vw, 75px);--font-header: clamp(20px, 3vw, 32px);--font-body: clamp(13px, 1.5vw, 18px);-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif}#app{height:100dvh}button,a,.clickable{cursor:pointer;user-select:none;transition:opacity .15s}button:not(.opaque):hover,a:not(.opaque):hover,.clickable:not(.opaque):hover{opacity:.8}button:not(.opaque):active,a:not(.opaque):active,.clickable:not(.opaque):active{opacity:.6}.subtext{color:var(--text-muted);font-size:clamp(13px,1.5vw,16px);line-height:22px;text-align:center}.link.colored{color:var(--accent)}.card{border-radius:var(--radius);box-shadow:#00000026 0 2px 8px;transition:all .2s}.card.clickable:hover{box-shadow:#00000040 0 2px 9px;transform:translateY(-1px)}.variable{transition:width .6s cubic-bezier(.65,0,.35,1),margin .6s cubic-bezier(.65,0,.35,1)}.class-average{color:var(--text-meta)}.point{flex-shrink:0;width:8px;height:8px;background-color:var(--dot-color);border-radius:50%}.point.big{width:10px;height:10px}.point.small{width:6px;height:6px}#background{position:relative;z-index:1;width:clamp(200px,30vw,450px);flex-shrink:0;overflow:hidden;background:linear-gradient(-212deg,var(--bg-dark) 0%,var(--bg-darker) 95%)}.triangle{position:absolute}#top-triangle{top:-175px;left:-175px;width:500px;filter:drop-shadow(3px 3px 15px rgba(0,0,0,.25))}#bottom-triangle{bottom:-75px;right:-100px;width:600px;filter:drop-shadow(-3px -3px 15px rgba(0,0,0,.25))}#content{flex-direction:column;justify-content:space-between;align-items:center;z-index:2;flex:1;min-width:0;padding:35px 0;overflow-y:auto;background-color:var(--surface)}#content.wide #header #logo{width:300px;margin:0}#header{width:100%;padding:20px var(--content-px);justify-content:space-between;align-items:center;flex-shrink:0;overflow:hidden}#header #logo{flex-shrink:0;width:400px;margin-top:25px;margin-left:12.5px}#header #logo svg{width:100%;height:auto}.header-actions{align-items:center;gap:clamp(12px,2vw,20px)}#export-btn,#export-btn-en{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--surface-alt);color:var(--text-primary);font-size:clamp(13px,1.5vw,16px);font-weight:600;transition:background .15s,opacity .15s}#export-btn:hover,#export-btn-en:hover{background:var(--dot-color)}.export-icon{display:flex;align-items:center}.export-icon svg{width:clamp(14px,1.5vw,18px);height:auto}#update-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--accent);color:#fff;font-size:clamp(13px,1.5vw,16px);font-weight:600;transition:background .15s,opacity .15s}#update-btn:hover{opacity:.85}.update-icon{display:flex;align-items:center}.update-icon svg{width:clamp(14px,1.5vw,18px);height:auto}#header #logout{color:#251515;font-size:clamp(16px,2vw,22px);font-weight:500}#footer{flex-direction:column;flex-shrink:0}#footer #links{justify-content:center;margin-bottom:8px;font-weight:500;font-size:clamp(16px,2vw,22px);color:var(--text-primary)}#main{flex-direction:column;flex-grow:1;justify-content:center;width:100%}.loading{flex-direction:column;align-items:center;padding:0 var(--content-px)}.loading-step{margin-top:clamp(20px,4vw,40px);font-size:clamp(16px,2vw,20px);font-weight:600;color:var(--text-primary);text-align:center}.loading-request{margin-top:6px;min-height:1.4em;max-width:100%;font-size:clamp(11px,1.2vw,13px);font-family:SF Mono,Cascadia Code,Fira Code,monospace;color:var(--text-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:0;transition:opacity .15s}.loading-request:not(:empty){opacity:1}.loading-quote{margin-top:clamp(25px,4vw,40px);font-size:clamp(13px,1.4vw,15px);font-style:italic;color:var(--text-muted);text-align:center;opacity:.6}.spinner{width:clamp(60px,8vw,85px);animation:spin .75s linear infinite}.spinner svg{width:100%;height:100%}@keyframes spin{to{transform:rotate(360deg)}}.content{flex-direction:column;flex-grow:1;align-items:flex-start;padding:5px var(--content-px);margin-bottom:25px;overflow-y:auto}.header{flex-direction:column;position:relative;font-weight:700;font-size:var(--font-header)}.header hr{width:100%;border-bottom:0;border-color:var(--surface);position:relative;z-index:-1}.filters{justify-content:space-between;width:100%;margin-bottom:clamp(30px,4vw,50px)}.combo-box{flex-direction:column;position:relative}.combo-box .name{height:20px;margin-bottom:clamp(5px,1vw,8px);margin-left:1px;color:#343434;font-size:clamp(14px,1.5vw,16px)}.combo-box .box{justify-content:space-between;align-items:center;min-width:clamp(200px,30vw,400px);height:clamp(32px,4vw,40px);padding:0 12px;border-radius:var(--radius);background-color:var(--surface-alt);font-size:clamp(12px,1.5vw,16px)}.combo-box .box svg{height:clamp(8px,1vw,10px);margin-top:2px;transition:transform .125s}.combo-box .box.opened svg{transform:rotate(180deg)}.combo-box .choices{flex-direction:column;position:absolute;top:75px;z-index:2;width:100%;background-color:var(--surface);border-radius:var(--radius);font-size:clamp(12px,1.5vw,16px)}.combo-box .choices .choice{padding:8px 12px;transition:background-color .15s}.combo-box .choices .choice:hover{background-color:#0000000d}.combo-box .choices .choice:active{background-color:#0000001a}.combo-box .choices .choice:first-child{border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}.combo-box .choices .choice:last-child{border-bottom-left-radius:var(--radius);border-bottom-right-radius:var(--radius)}.no-updates{margin-bottom:20px;font-size:var(--font-body)}.updates{flex-direction:column;width:100%;margin-bottom:15px}.updates .update{align-items:center;margin-bottom:10px;padding-left:35px;font-size:clamp(18px,2.5vw,28px)}.updates .update .top{align-items:center}.updates .update .top .id{margin-left:15px;margin-right:10px;font-weight:700}.updates .update .top .dash{margin-right:10px;font-size:clamp(18px,2vw,24px)}.updates .update .top .name{font-size:var(--font-body);margin-right:10px}.updates .update .top .name .target{font-weight:500}.updates .update .mark{align-items:center;margin-bottom:1px;font-weight:500}.updates .update .mark .point{margin-left:2px;margin-right:12px}.updates .update .mark .from{color:#a5a9b5;text-decoration:line-through}.updates .update .mark .update-arrow{margin:0 10px}.updates .update .mark .type-sign{margin-left:12px;margin-bottom:2px}.updates .update .mark .type-sign svg{width:30px}.big-list{flex-direction:column;margin-bottom:20px;padding-top:5px;transition:opacity .15s}.big-list .entry{align-items:center;margin-bottom:12px;padding-left:clamp(15px,3vw,35px);font-size:clamp(18px,2.8vw,26px)}.big-list .entry .name{margin-left:12px;margin-right:10px}.big-list .entry .mark{margin-left:10px}.big-list .entry .mark .value{font-weight:700}.track-info{flex-direction:column}.track-info-name{font-weight:700;font-size:var(--font-header)}.track-info-detail{font-size:clamp(12px,1.4vw,15px);color:var(--text-muted);margin-top:2px}.coeff-info{flex-direction:column;margin-top:8px;padding-left:clamp(15px,3vw,35px);font-size:clamp(14px,1.8vw,18px)}.coeff-main{align-items:center;gap:12px;font-weight:500}.coeff-muted{color:var(--text-muted);font-weight:400}.coeff-links{margin-top:5px;margin-left:20px;font-size:clamp(12px,1.4vw,15px);font-weight:500}.coeff-copied{color:#44b732!important}.api-error-panel{flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;height:100%;padding:40px 30px;gap:16px;z-index:2}.api-error-title{font-size:22px;font-weight:700;color:#e34e4e}.api-error-desc{font-size:14px;color:#aaa;line-height:1.6;max-width:400px}.api-error-box{background:#1e2233;color:#ff6b6b;padding:12px 18px;border-radius:10px;font-size:11px;max-width:100%;overflow-x:auto;text-align:left;white-space:pre-wrap;word-break:break-word}.api-error-actions{gap:10px;flex-wrap:wrap;justify-content:center}.api-error-btn{padding:8px 20px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;border:1px solid #444;background:none;color:#aaa;text-decoration:none}.api-error-btn.primary{background:#fff;color:#151925;border-color:#fff}.api-error-btn.muted{color:#666;border-color:#444;font-weight:400}.api-error-btn:hover{opacity:.85}.empty-state{flex-direction:column;align-items:center;justify-content:center;width:100%;flex-grow:1;padding:60px 20px;text-align:center;gap:8px}.empty-state-text{font-size:18px;font-weight:600;color:var(--text-primary)}.empty-state-hint{font-size:14px;color:var(--text-muted)}hr.separator{width:100%;margin-top:25px;opacity:.3;border-bottom:0;border-color:var(--surface)}.header.module{max-width:100%;margin-top:50px}.header.module .text{align-items:center}.header.module .name,.header.module .average,.header.module .class-average,.header.module .max{white-space:nowrap}.header.module .name{display:inline-block;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}.header.module .point{margin:2px 10px 0}.header.module .class-average{margin-left:10px;font-weight:400}.subject{width:100%;margin:15px 0}.subject .info{flex-direction:column;align-items:center;flex-shrink:0;width:250px;padding-top:15px;padding-bottom:17px}.subject .info .top,.subject .info .bottom{display:contents}.subject .info .id{font-weight:700;font-size:24px;word-break:break-word}.subject .info .point{display:none}.subject .info .average{margin-top:10px;font-size:24px}.subject .info .average .value{font-weight:700}.subject .info .class-average{font-size:14px}.subject .info .bottom-line{display:none}.subject .marks{flex-direction:column;flex-grow:1;justify-content:center;max-width:calc(100% - 275px);padding:15px 0;font-size:16px}.subject .marks .marks-title{font-weight:600;font-size:15px;margin-bottom:6px;color:#444}.subject .marks .mark{align-items:center;max-width:100%;margin:3px 0}.subject .marks .mark .point{margin-bottom:1px}.subject .marks .mark .line{display:contents}.subject .marks .mark .name,.subject .marks .mark .value,.subject .marks .mark .class-average{white-space:nowrap}.subject .marks .mark .name{display:inline-block;margin-left:15px;overflow:hidden;text-overflow:ellipsis;padding-bottom:2px}.subject .marks .mark .value{justify-content:flex-end;margin-left:1px;font-weight:700}.subject .marks .mark .class-average{margin-left:10px}.coeff-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:4px;font-size:.7em;font-weight:600;letter-spacing:.02em;vertical-align:middle}.coeff-badge.ects{background:#e8f5e9;color:#2e7d32}.coeff-badge.coef{background:var(--surface-alt);color:var(--text-muted)}.copy-code{display:inline-block;border-bottom:1px dashed var(--dot-color)}.copy-code:hover{border-bottom-color:var(--text-muted)}.code-tooltip{position:fixed;z-index:9999;padding:5px 12px;border-radius:5px;background:var(--bg-darker);color:#e8eaed;font-size:13px;font-weight:500;letter-spacing:.3px;font-family:SF Mono,Cascadia Code,Fira Code,monospace;white-space:nowrap;pointer-events:none;box-shadow:0 4px 12px #0000004d;opacity:0;transition:opacity .12s}.code-tooltip.copied{background:var(--accent);color:#fff;font-family:inherit}.no-marks{flex-grow:1;justify-content:center;align-items:center;width:100%;font-size:28px}@media (max-width: 850px){.filters{flex-direction:column;gap:15px}.header hr{margin-top:9px}.updates{margin-top:4px;margin-bottom:12px}.updates .update{display:grid;grid-template-columns:17px 100%;margin-bottom:6px;padding-left:15px}.updates .update>.point{width:6px;height:6px}.updates .update .top .id{margin-left:0;margin-right:6px}.updates .update .top .name{display:inline-block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.updates .update .top .name .target{display:none}.updates .update .mark{grid-column:2 / 3;height:23px}.updates .update .mark .point{display:none}.updates .update .mark .update-arrow{width:20px;margin:0 6px 1px}.updates .update .mark .type-sign{width:14px;margin-left:6px;margin-bottom:2px}.header.module{margin-top:20px;margin-bottom:6px}.header.module .text{flex-direction:column;align-items:flex-start;margin-left:-1px}.header.module .text .name{max-width:100%;margin-bottom:2px;font-size:20px}.header.module .text .point{display:none}.header.module .text .bottom{align-items:center;font-size:16px}.header.module .text .bottom .class-average{margin-left:5px;font-size:14px}.header.module .bottom-line{margin-top:7px;margin-bottom:1px;opacity:.6}.subject{flex-direction:column;margin:10px 0;padding:10px 14px}.subject .no-marks{margin:4px 0;font-size:14px}.subject .info{align-items:flex-start;width:100%;padding:0}.subject .info .top,.subject .info .bottom{display:flex;align-items:center;max-width:100%}.subject .info .id{font-size:18px}.subject .info .point{display:block;width:5px;height:5px;margin:0 8px}.subject .info .average{margin:0;font-size:14px}.subject .info .class-average{margin-left:5px;font-size:12px}.subject .info .bottom-line{display:block;width:100%;border-bottom:0;border-color:var(--surface);opacity:.3}.subject .marks{max-width:100%;padding:0}.subject .marks .mark{display:grid;grid-template-columns:12px calc(100% - 5px);padding:0 5px}.subject .marks .mark .point{width:5px;height:5px;margin-top:1px}.subject .marks .mark .line{display:flex;flex-direction:row-reverse;justify-content:flex-end;font-size:13px}.subject .marks .mark .line .name{margin-left:0}.subject .marks .mark .line .value{width:auto;margin-left:0}.subject .marks .mark .class-average{grid-column:2 / 3;margin-left:0;font-size:11px}.subject .marks .mark .class-average .parenthesis{display:none}}@media (max-width: 575px){#background{display:none}#header{flex-direction:column;padding:0;justify-content:center;margin-bottom:20px}#header #logo{margin-top:15px;margin-left:0;max-width:80%}#content{padding:15px 0}hr.separator{margin-top:0;margin-bottom:5px}}@media (max-height: 650px){#header #logo{margin-top:0}#header #logo svg{height:115px}}@media (max-height: 550px){#header{margin-bottom:10px}#header #logo svg{height:100px}#header #logout{font-size:16px}}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--dot-color);border-radius:3px}#print-view{display:none}@media print{@page{size:A4 portrait;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{overflow:visible;margin:0;background:#fff}#app{height:auto;display:block}#print-view{padding:18mm 16mm!important}#background,#content,#view-switcher{display:none!important}#print-view{display:block!important;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a2e}.p-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;padding-bottom:16px;border-bottom:2.5px solid #3b6fa0}.p-header-left{display:flex;flex-direction:column;gap:1px}.p-info{font-size:11.5px;color:#555;line-height:1.5}.p-student{font-size:13px;font-weight:700;margin-top:6px;color:#1a1a2e}.p-header-right{font-size:24px;font-weight:800;color:#1a1a2e;letter-spacing:-.01em;text-align:right;flex-shrink:0;margin-left:30px}.p-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.35}.p-table th,.p-table td{padding:7px 12px;border:1px solid #c0ccd8;vertical-align:middle}.p-left{text-align:left!important}.p-col-name{width:48%}.p-col-ects{width:12%}.p-col-avg{width:20%}.p-table thead th{background:#4a7fb5!important;color:#fff!important;font-weight:700;font-size:11px;text-align:center;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px}.p-table .p-ue td{background:#d6e4f0!important;font-weight:800;text-align:center;font-size:13px;padding:9px 12px;border-color:#a8bdd2}.p-table .p-sub td{text-align:center;font-size:11.5px;padding:5px 12px}.p-table .p-sub td:first-child{padding-left:22px}.p-table .p-sub td:last-child{font-weight:700}.p-coef{margin-left:6px;font-size:9px;color:#7a8a9e;font-weight:600}.p-table .p-total td{background:#4a7fb5!important;color:#fff!important;font-weight:800;font-size:13px;text-align:center;padding:9px 12px;border-color:#3a6a9a}.p-notes{margin-top:16px;font-size:10px;color:#555;line-height:1.6}.p-footer{margin-top:12px;font-size:9px;color:#aaa;text-align:center;letter-spacing:.02em}}\n";(document.head||document.documentElement).appendChild(s)})();
 (function() {
 	//#region \0rolldown/runtime.js
 	var __create = Object.create;
@@ -290,6 +290,7 @@
 		const lookup = /* @__PURE__ */ new Map();
 		for (const entry of entries) lookup.set(entry.examCode, {
 			name: entry.name,
+			nameEn: entry.nameEn,
 			avgPreRatt: entry.avgPreRatt,
 			avgFinal: entry.avgFinal
 		});
@@ -455,12 +456,18 @@
 			if (!modules.has(moduleCode)) {
 				const info = resolveName(moduleCode, "_" + moduleId, nameLookup);
 				let name = moduleId;
-				if (info) name = info.name.length <= 40 ? info.name : moduleId;
+				let nameEn = moduleId;
+				if (info) {
+					name = info.name.length <= 40 ? info.name : moduleId;
+					const en = info.nameEn || info.name;
+					nameEn = en.length <= 40 ? en : moduleId;
+				}
 				const modPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
 				modules.set(moduleCode, {
 					id: moduleId,
 					_code: moduleCode,
 					name,
+					nameEn,
 					average: null,
 					classAverage: isNaN(modPromo) ? null : modPromo,
 					subjects: /* @__PURE__ */ new Map()
@@ -470,10 +477,12 @@
 			if (!mod.subjects.has(subject.code)) {
 				const info = resolveName(subject.code, "_" + subject.id, nameLookup);
 				const subPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
+				const fallbackName = subject.id.replace(/_/g, " ");
 				mod.subjects.set(subject.code, {
 					id: subject.id,
 					_code: subject.code,
-					name: info ? info.name : subject.id.replace(/_/g, " "),
+					name: info ? info.name : fallbackName,
+					nameEn: info ? info.nameEn || info.name : fallbackName,
 					average: null,
 					classAverage: isNaN(subPromo) ? null : subPromo,
 					coefficient: 1,
@@ -621,6 +630,7 @@
 		return {
 			examCode,
 			name: caption.fr || caption.en || examCode,
+			nameEn: caption.en || caption.fr || examCode,
 			avgPreRatt: line[SYNTHESIS.avgPreRatt],
 			avgFinal: line[SYNTHESIS.avgFinal]
 		};
@@ -941,25 +951,29 @@
 		s07_2526_fisa_dev_default = {
 			"2526_I_INF_FISA_S07_AEE": 8,
 			"2526_I_INF_FISA_S07_AG": 1,
-			"2526_I_INF_FISA_S07_CN": 3,
-			"2526_I_INF_FISA_S07_PR": 2,
+			"2526_I_INF_FISA_S07_CN": 1,
+			"2526_I_INF_FISA_S07_FR": 2,
+			"2526_I_INF_FISA_S07_GR": 3,
+			"2526_I_INF_FISA_S07_PR": 3,
 			"2526_I_INF_FISA_S07_PR_42SH": {
 				"ects": 2,
 				"module": "SAE 42SH",
 				"name": "Projet Shell"
 			},
-			"2526_I_INF_FISA_S07_PL": 3,
-			"2526_I_INF_FISA_S07_DEV_CI": 3,
+			"2526_I_INF_FISA_S07_DEVSEC": 3,
+			"2526_I_INF_FISA_S07_INT": 4,
+			"2526_I_INF_FISA_S07_PL": 1,
+			"2526_I_INF_FISA_S07_CI": 2,
 			"2526_I_INF_FISA_S07_DEV_CI_BADG1_EX": 2,
-			"2526_I_INF_FISA_S07_DEV_OC": 3,
+			"2526_I_INF_FISA_S07_OC": 3,
 			"2526_I_INF_FISA_S07_DEV_OC_PPAR_EX": 2,
-			"2526_I_INF_FISA_S07_DEV_WMM": 8.5,
+			"2526_I_INF_FISA_S07_WMM": 9,
 			"2526_I_INF_FISA_S07_DEV_WMM_AWEB_EX": 3,
-			"2526_I_INF_FISA_S07_DEV_WMM_IANDO_EX": 2,
+			"2526_I_INF_FISA_S07_DEV_WMM_IANDO_EX": 1.5,
 			"2526_I_INF_FISA_S07_DEV_WMM_IJST_EX": 1.5,
-			"2526_I_INF_FISA_S07_DEV_WMM_J2E_EX": .5,
-			"2526_I_INF_FISA_S07_DEV_WMM_J2E_PROJET": 1.5,
-			"2526_I_INF_FISA_S07_DEV_WEB1": 1.5
+			"2526_I_INF_FISA_S07_DEV_WMM_J2E_EX": .75,
+			"2526_I_INF_FISA_S07_DEV_WMM_J2E_PROJET": 2.25,
+			"2526_I_INF_FISA_S07_WEB1": 3
 		};
 	}));
 	//#endregion
@@ -1627,41 +1641,294 @@
 		init_tooltip();
 	}));
 	//#endregion
+	//#region src/i18n.js
+	/** Resolve a dotted key against an explicit language; falls back to the key on miss. */
+	function tFor(lang, key, ...args) {
+		const root = dict[lang] || dict[currentLang];
+		const node = key.split(".").reduce((o, k) => o == null ? o : o[k], root);
+		if (node == null) return key;
+		return typeof node === "function" ? node(...args) : node;
+	}
+	/** Resolve a dotted key against the current language; falls back to the key on miss. */
+	function t(key, ...args) {
+		return tFor(currentLang, key, ...args);
+	}
+	function setLang(lang) {
+		if (!dict[lang] || lang === currentLang) return;
+		currentLang = lang;
+		if (hasLocalStorage) try {
+			localStorage.setItem(STORAGE_KEY, lang);
+		} catch {}
+		if (hasDocument) try {
+			document.documentElement.setAttribute("lang", lang);
+		} catch {}
+		subscribers.forEach((fn) => {
+			try {
+				fn(lang);
+			} catch (e) {
+				console.error("[i18n] subscriber error:", e);
+			}
+		});
+	}
+	var dict, STORAGE_KEY, hasLocalStorage, hasNavigator, hasDocument, currentLang, subscribers, getLang, availableLangs;
+	var init_i18n = __esmMin((() => {
+		dict = {
+			fr: {
+				header: {
+					logout: "Se deconnecter",
+					exportFr: "PDF",
+					exportEn: "PDF EN"
+				},
+				sidebar: {
+					changes: "Derniers changements",
+					noChanges: "Aucun changement depuis votre derniere visite.",
+					averages: "Moyennes",
+					promotion: "Promotion"
+				},
+				filters: {
+					semester: "Semestre",
+					semesterValue: (n, y1, y2) => `Semestre ${n} - ${y1}/${y2}`
+				},
+				badges: {
+					coef: (n) => `coef. ${n}`,
+					ects: (n) => `${n} ECTS`,
+					promoMeta: (g) => `promo: ${g}`,
+					coeffMeta: (g) => `coeff. ${g}`,
+					avgMeta: (g) => `moyenne: ${g}`
+				},
+				update: {
+					average: "moyenne",
+					mark: "note"
+				},
+				marks: { none: "Aucune note" },
+				coeff: {
+					corrected: "Coefficients corrigés par la communauté",
+					uncorrected: "Coefficients non corrigés ",
+					uncorrectedHint: "(Auriga les considère tous égaux)",
+					viewSource: "Voir la source",
+					copyCodes: "Copier les codes",
+					copied: "Copié !"
+				},
+				empty: { hint: "Les notes seront disponibles ici une fois la connexion rétablie." },
+				errors: {
+					title: "Oups, quelque chose a cassé",
+					menuChanged: "Le format du menu Auriga a peut-être changé. ",
+					apiDown: "Le serveur Auriga ne répond pas correctement. ",
+					sessionExpired: "Votre session a expiré. ",
+					formatChanged: "Le format des données Auriga a changé. ",
+					cachedSuffix: "Vos notes en cache sont affichées à droite, mais elles peuvent être obsolètes.",
+					retrySuffix: "Essayez de recharger la page. Si le problème persiste, signalez-le.",
+					reload: "Recharger",
+					report: "Signaler",
+					resetCache: "Reset cache",
+					noCachedTitle: "Aucune note en cache",
+					issueTitlePrefix: "Erreur: ",
+					issueBodyError: "## Erreur",
+					issueBodyContext: "## Contexte"
+				},
+				coeff2: { contribute: "Contribuer" },
+				footer: {
+					exportPdf: "Exporter PDF",
+					coefficients: "Coefficients",
+					sources: "Sources",
+					reset: "Reset",
+					licensed: "Licensed under "
+				},
+				loading: {
+					initial: "Chargement...",
+					student: "Etudiant",
+					profile: "Récupération du profil...",
+					filters: "Récupération des filtres...",
+					grades: "Récupération des notes...",
+					coefficients: "Application des coefficients...",
+					changes: "Calcul des changements...",
+					quotes: [
+						"Auriga va moins vite que votre grand-mère...",
+						"On négocie avec le serveur...",
+						"Pendant ce temps, les profs corrigent vos copies...",
+						"Chargement plus rapide qu'un rendu de projet EPITA...",
+						"Patience, même Auriga a besoin de café le matin...",
+						"Calcul de votre moyenne... priez.",
+						"On hack le système pour vous (légalement)...",
+						"Les notes arrivent... comme les bus, par paquets.",
+						"Optimisation en cours... contrairement à votre code.",
+						"Bientôt prêt, promis (pas comme vos deadlines)."
+					]
+				},
+				print: {
+					cycleYear: (track, year) => `Cycle ${track} — Année universitaire : ${year}`,
+					bulletin: (semNum) => `Bulletin du Semestre ${semNum}`,
+					colSemester: (semNum) => `Semestre ${semNum}`,
+					colEcts: "ECTS ACQUIS",
+					colAvgPromoL1: "Moyenne",
+					colAvgPromoL2: "Promotion",
+					colAvgStudentL1: "Moyenne",
+					colAvgStudentL2: "Étudiant",
+					overallAvg: "MOYENNE GÉNÉRALE",
+					footer: (version) => `Exporté depuis Infinity Auriga v${version} — ${(/* @__PURE__ */ new Date()).toLocaleDateString("fr-FR", {
+						day: "numeric",
+						month: "long",
+						year: "numeric"
+					})}`,
+					filenameBase: "Bulletin"
+				}
+			},
+			en: {
+				header: {
+					logout: "Log out",
+					exportFr: "PDF",
+					exportEn: "PDF EN"
+				},
+				sidebar: {
+					changes: "Recent changes",
+					noChanges: "No changes since your last visit.",
+					averages: "Averages",
+					promotion: "Class"
+				},
+				filters: {
+					semester: "Semester",
+					semesterValue: (n, y1, y2) => `Semester ${n} - ${y1}/${y2}`
+				},
+				badges: {
+					coef: (n) => `coef. ${n}`,
+					ects: (n) => `${n} ECTS`,
+					promoMeta: (g) => `class: ${g}`,
+					coeffMeta: (g) => `coeff. ${g}`,
+					avgMeta: (g) => `avg: ${g}`
+				},
+				update: {
+					average: "average",
+					mark: "mark"
+				},
+				marks: { none: "No marks yet" },
+				coeff: {
+					corrected: "Coefficients fixed by the community",
+					uncorrected: "Uncorrected coefficients ",
+					uncorrectedHint: "(Auriga treats them all as equal)",
+					viewSource: "View source",
+					copyCodes: "Copy codes",
+					copied: "Copied!"
+				},
+				empty: { hint: "Grades will appear here once the connection is restored." },
+				errors: {
+					title: "Oops, something broke",
+					menuChanged: "Auriga's menu format may have changed. ",
+					apiDown: "The Auriga server is not responding correctly. ",
+					sessionExpired: "Your session has expired. ",
+					formatChanged: "Auriga's data format has changed. ",
+					cachedSuffix: "Your cached grades are shown on the right, but they may be out of date.",
+					retrySuffix: "Try reloading the page. If the issue persists, please report it.",
+					reload: "Reload",
+					report: "Report",
+					resetCache: "Reset cache",
+					noCachedTitle: "No cached grades",
+					issueTitlePrefix: "Error: ",
+					issueBodyError: "## Error",
+					issueBodyContext: "## Context"
+				},
+				coeff2: { contribute: "Contribute" },
+				footer: {
+					exportPdf: "Export PDF",
+					coefficients: "Coefficients",
+					sources: "Sources",
+					reset: "Reset",
+					licensed: "Licensed under "
+				},
+				loading: {
+					initial: "Loading...",
+					student: "Student",
+					profile: "Fetching profile...",
+					filters: "Fetching filters...",
+					grades: "Fetching grades...",
+					coefficients: "Applying coefficients...",
+					changes: "Computing changes...",
+					quotes: [
+						"Auriga's slower than your grandma...",
+						"Negotiating with the server...",
+						"Meanwhile, profs are grading your papers...",
+						"Loading faster than an EPITA project submission...",
+						"Patience, even Auriga needs morning coffee...",
+						"Computing your average... pray.",
+						"Hacking the system for you (legally)...",
+						"Grades arrive... like buses, in batches.",
+						"Optimization in progress... unlike your code.",
+						"Almost ready, promise (not like your deadlines)."
+					]
+				},
+				print: {
+					cycleYear: (track, year) => `Cycle ${track} — Academic Year: ${year}`,
+					bulletin: (semNum) => `Semester ${semNum} Report Card`,
+					colSemester: (semNum) => `Semester ${semNum}`,
+					colEcts: "ECTS CREDITS EARNED",
+					colAvgPromoL1: "Average",
+					colAvgPromoL2: "Promotion",
+					colAvgStudentL1: "Student",
+					colAvgStudentL2: "Average",
+					overallAvg: "OVERALL AVERAGE",
+					footer: (version) => `Exported from Infinity Auriga v${version} — ${(/* @__PURE__ */ new Date()).toLocaleDateString("en-GB", {
+						day: "numeric",
+						month: "long",
+						year: "numeric"
+					})}`,
+					filenameBase: "Report Card"
+				}
+			}
+		};
+		STORAGE_KEY = "auriga-lang";
+		hasLocalStorage = typeof localStorage !== "undefined";
+		hasNavigator = typeof navigator !== "undefined";
+		hasDocument = typeof document !== "undefined";
+		currentLang = (() => {
+			if (hasLocalStorage) try {
+				const stored = localStorage.getItem(STORAGE_KEY);
+				if (stored && dict[stored]) return stored;
+			} catch {}
+			if (hasNavigator && navigator.language?.toLowerCase().startsWith("fr")) return "fr";
+			return "en";
+		})();
+		subscribers = /* @__PURE__ */ new Set();
+		getLang = () => currentLang;
+		availableLangs = () => Object.keys(dict);
+		if (hasDocument) try {
+			document.documentElement.setAttribute("lang", currentLang);
+		} catch {}
+	}));
+	//#endregion
 	//#region src/render/print.js
 	function fmt(v) {
 		if (v === .01) return "Abs.";
 		if (v !== 0 && !v) return "";
 		return v.toFixed(2).replace(".", ",");
 	}
-	function renderPrintView(marks, averages, coeffMeta, name) {
+	function renderPrintView(marks, averages, coeffMeta, name, lang = getLang()) {
+		const tr = (key, ...args) => tFor(lang, key, ...args);
+		const pickName = (mod) => lang === "en" ? mod.nameEn || mod.name : mod.name;
 		const rows = [];
 		for (const mod of marks) {
-			rows.push(h("tr", { class: "p-ue" }, h("td", { class: "p-left" }, mod.name), h("td", {}, mod._overridden ? String(mod.coefficient) : ""), h("td", {}, fmt(mod.classAverage)), h("td", {}, fmt(mod.average))));
+			rows.push(h("tr", { class: "p-ue" }, h("td", { class: "p-left" }, pickName(mod)), h("td", {}, mod._overridden ? String(mod.coefficient) : ""), h("td", {}, fmt(mod.classAverage)), h("td", {}, fmt(mod.average))));
 			for (const sub of mod.subjects) {
-				const hasRealName = sub.name !== sub.id.replace(/_/g, " ");
+				const subDisplayName = pickName(sub);
+				const hasRealName = subDisplayName !== sub.id.replace(/_/g, " ");
 				const shortId = sub.id.startsWith(mod.id + "_") ? sub.id.slice(mod.id.length + 1) : sub.id;
-				const subName = hasRealName ? sub.name : shortId.replace(/_/g, " ");
-				const coefTag = sub._overridden ? h("span", { class: "p-coef" }, `coef. ${sub.coefficient}`) : null;
+				const subName = hasRealName ? subDisplayName : shortId.replace(/_/g, " ");
+				const coefTag = sub._overridden ? h("span", { class: "p-coef" }, tr("badges.coef", sub.coefficient)) : null;
 				rows.push(h("tr", { class: "p-sub" }, h("td", { class: "p-left" }, subName, ...coefTag ? [coefTag] : []), h("td", {}), h("td", {}, fmt(sub.classAverage)), h("td", {}, fmt(sub.average))));
 			}
 		}
 		rows.push(h("tr", { class: "p-total" }, h("td", {
 			class: "p-left",
 			colspan: "2"
-		}, "MOYENNE GÉNÉRALE"), h("td", {}, fmt(averages.promo)), h("td", {}, fmt(averages.student))));
+		}, tr("print.overallAvg")), h("td", {}, fmt(averages.promo)), h("td", {}, fmt(averages.student))));
 		const year = coeffMeta ? `20${coeffMeta.year.slice(0, 2)}/20${coeffMeta.year.slice(2)}` : "";
 		const semNum = (coeffMeta?.semester || "").replace(/\D/g, "");
 		const trackLabel = coeffMeta ? coeffMeta.name || `${coeffMeta.track} ${coeffMeta.major || ""}`.trim() : "";
 		const trackCode = coeffMeta ? `${coeffMeta.track}${coeffMeta.major ? " " + coeffMeta.major : ""}` : "";
-		return h("div", { id: "print-view" }, h("div", { class: "p-header" }, h("div", { class: "p-header-left" }, ...trackCode && year ? [h("div", { class: "p-info" }, `Cycle ${trackCode} — Année universitaire : ${year}`)] : [], ...semNum ? [h("div", { class: "p-info" }, `Bulletin du Semestre ${semNum}`)] : [], ...name ? [h("div", { class: "p-student" }, name)] : []), ...trackLabel ? [h("div", { class: "p-header-right" }, trackLabel)] : []), h("table", { class: "p-table" }, h("thead", {}, h("tr", {}, h("th", { class: "p-left p-col-name" }, `Semestre ${semNum}`), h("th", { class: "p-col-ects" }, "ECTS ACQUIS"), h("th", { class: "p-col-avg" }, "Moyenne", h("br"), "Promotion"), h("th", { class: "p-col-avg" }, "Moyenne", h("br"), "Étudiant"))), h("tbody", {}, ...rows)), h("div", { class: "p-footer" }, `Exporté depuis Infinity Auriga v${app.version} — ${(/* @__PURE__ */ new Date()).toLocaleDateString("fr-FR", {
-			day: "numeric",
-			month: "long",
-			year: "numeric"
-		})}`));
+		return h("div", { id: "print-view" }, h("div", { class: "p-header" }, h("div", { class: "p-header-left" }, ...trackCode && year ? [h("div", { class: "p-info" }, tr("print.cycleYear", trackCode, year))] : [], ...semNum ? [h("div", { class: "p-info" }, tr("print.bulletin", semNum))] : [], ...name ? [h("div", { class: "p-student" }, name)] : []), ...trackLabel ? [h("div", { class: "p-header-right" }, trackLabel)] : []), h("table", { class: "p-table" }, h("thead", {}, h("tr", {}, h("th", { class: "p-left p-col-name" }, tr("print.colSemester", semNum)), h("th", { class: "p-col-ects" }, tr("print.colEcts")), h("th", { class: "p-col-avg" }, tr("print.colAvgPromoL1"), h("br"), tr("print.colAvgPromoL2")), h("th", { class: "p-col-avg" }, tr("print.colAvgStudentL1"), h("br"), tr("print.colAvgStudentL2")))), h("tbody", {}, ...rows)), h("div", { class: "p-footer" }, tr("print.footer", app.version)));
 	}
 	var init_print = __esmMin((() => {
 		init_dom();
 		init_app$1();
+		init_i18n();
 	}));
 	//#endregion
 	//#region src/version-check.js
@@ -1704,26 +1971,26 @@
 	function createApiErrorPanel(error, hasCachedData) {
 		const message = error?.message || String(error);
 		let hint = "";
-		if (message.includes("Menu entries not found") || message.includes("menu")) hint = "Le format du menu Auriga a peut-être changé. ";
-		else if (message.includes("API error") || message.includes("fetch")) hint = "Le serveur Auriga ne répond pas correctement. ";
-		else if (message.includes("access token") || message.includes("401")) hint = "Votre session a expiré. ";
-		else if (message.includes("API format changed") || message.includes("parse")) hint = "Le format des données Auriga a changé. ";
-		const desc = hasCachedData ? hint + "Vos notes en cache sont affichées à droite, mais elles peuvent être obsolètes." : hint + "Essayez de recharger la page. Si le problème persiste, signalez-le.";
-		const reportUrl = `${app.repository}/issues/new?title=${encodeURIComponent("Erreur: " + message.substring(0, 80))}&body=${encodeURIComponent("## Erreur\n```\n" + message + "\n```\n\n## Contexte\n- Version: " + app.version + "\n- URL: " + window.location.href + "\n- Date: " + (/* @__PURE__ */ new Date()).toISOString())}`;
-		return h("div", { class: "api-error-panel" }, h("div", { class: "api-error-title" }, "Oups, quelque chose a cassé"), h("div", { class: "api-error-desc" }, desc), h("pre", { class: "api-error-box" }, message), h("div", { class: "api-error-actions" }, h("button", {
+		if (message.includes("Menu entries not found") || message.includes("menu")) hint = t("errors.menuChanged");
+		else if (message.includes("API error") || message.includes("fetch")) hint = t("errors.apiDown");
+		else if (message.includes("access token") || message.includes("401")) hint = t("errors.sessionExpired");
+		else if (message.includes("API format changed") || message.includes("parse")) hint = t("errors.formatChanged");
+		const desc = hasCachedData ? hint + t("errors.cachedSuffix") : hint + t("errors.retrySuffix");
+		const reportUrl = `${app.repository}/issues/new?title=${encodeURIComponent(t("errors.issueTitlePrefix") + message.substring(0, 80))}&body=${encodeURIComponent(t("errors.issueBodyError") + "\n```\n" + message + "\n```\n\n" + t("errors.issueBodyContext") + "\n- Version: " + app.version + "\n- URL: " + window.location.href + "\n- Date: " + (/* @__PURE__ */ new Date()).toISOString())}`;
+		return h("div", { class: "api-error-panel" }, h("div", { class: "api-error-title" }, t("errors.title")), h("div", { class: "api-error-desc" }, desc), h("pre", { class: "api-error-box" }, message), h("div", { class: "api-error-actions" }, h("button", {
 			class: "api-error-btn primary",
 			onclick: () => window.location.reload()
-		}, "Recharger"), h("a", {
+		}, t("errors.reload")), h("a", {
 			href: reportUrl,
 			target: "_blank",
 			class: "api-error-btn"
-		}, "Signaler"), h("button", {
+		}, t("errors.report")), h("button", {
 			class: "api-error-btn muted",
 			onclick: () => {
 				localStorage.clear();
 				window.location.reload();
 			}
-		}, "Reset cache")));
+		}, t("errors.resetCache"))));
 	}
 	/**
 	* Copy coefficient template to clipboard.
@@ -1735,12 +2002,28 @@
 			onclick: (e) => {
 				e.preventDefault();
 				navigator.clipboard.writeText(content).then(() => {
-					btn.textContent = "Copié !";
+					btn.textContent = t("coeff.copied");
 					btn.classList.add("coeff-copied");
 				});
 			}
-		}, "Copier les codes");
+		}, t("coeff.copyCodes"));
 		return btn;
+	}
+	/**
+	* Compact FR | EN segmented toggle. setLang triggers all subscribers,
+	* which includes boot.js's re-render of the whole app.
+	*/
+	function renderLangToggle() {
+		const current = getLang();
+		return h("div", {
+			class: "lang-toggle",
+			role: "group",
+			"aria-label": "Language"
+		}, ...availableLangs().map((code) => h("button", {
+			class: "lang-btn" + (code === current ? " active" : ""),
+			onclick: () => setLang(code),
+			"aria-pressed": code === current ? "true" : "false"
+		}, code.toUpperCase())));
 	}
 	function renderApp(container, { name, marks, averages, filters, filtersValues, updates, coeffSource, coeffMeta, coeffTemplate, apiError, onSemesterChange }) {
 		container.replaceChildren();
@@ -1754,28 +2037,43 @@
 		}, bottom_triangle_default)));
 		const visibleUpdates = updates.filter((u) => u.type !== "average-update");
 		const avgEntries = [{
-			label: "Etudiant",
+			label: t("loading.student"),
 			value: averages.student,
 			colored: true
 		}, {
-			label: "Promotion",
+			label: t("sidebar.promotion"),
 			value: averages.promo,
 			colored: false
 		}];
 		const moduleEls = marks.flatMap((mod) => {
-			const modOverriddenEl = mod._overridden ? h("span", { class: "coeff-badge ects" }, `${mod.coefficient} ECTS`) : null;
-			return [h("div", { class: "header module" }, h("div", { class: "text" }, h("div", { class: "name" }, copyCodeEl(mod._code, mod.name)), h("div", { class: "point" }), h("div", { class: "bottom" }, h("span", {
+			const modOverriddenEl = mod._overridden ? h("span", { class: "coeff-badge ects" }, t("badges.ects", mod.coefficient)) : null;
+			const modName = getLang() === "en" ? mod.nameEn || mod.name : mod.name;
+			return [h("div", { class: "header module" }, h("div", { class: "text" }, h("div", { class: "name" }, copyCodeEl(mod._code, modName)), h("div", { class: "point" }), h("div", { class: "bottom" }, h("span", {
 				class: "average",
 				style: { color: gradeColor(mod.average) }
-			}, formatGrade(mod.average)), h("span", { class: "max" }, "\xA0/ 20"), ...mod.classAverage != null ? [h("span", { class: "class-average" }, `(promo: ${formatGrade(mod.classAverage)})`)] : [], ...modOverriddenEl ? [modOverriddenEl] : [])), h("hr", { class: "bottom-line" })), ...mod.subjects.map((s) => renderSubject(s, mod.id))];
+			}, formatGrade(mod.average)), h("span", { class: "max" }, "\xA0/ 20"), ...mod.classAverage != null ? [h("span", { class: "class-average" }, `(${t("badges.promoMeta", formatGrade(mod.classAverage))})`)] : [], ...modOverriddenEl ? [modOverriddenEl] : [])), h("hr", { class: "bottom-line" })), ...mod.subjects.map((s) => renderSubject(s, mod.id))];
 		});
+		const printAs = (lang) => {
+			if (!hasCachedData) {
+				window.print();
+				return;
+			}
+			const existing = document.getElementById("print-view");
+			if (existing) existing.remove();
+			container.appendChild(renderPrintView(marks, averages, coeffMeta, name, lang));
+			const parts = [tFor(lang, "print.filenameBase")];
+			if (coeffMeta?.semester) parts.push(coeffMeta.semester);
+			if (name) parts.push(name);
+			document.title = parts.join(" — ");
+			window.print();
+		};
 		container.appendChild(h("div", {
 			id: "content",
 			class: "variable wide"
 		}, h("div", { id: "header" }, html("div", {
 			id: "logo",
 			class: "variable"
-		}, logo_default), ...name ? [h("div", { class: "header-actions" }, h("a", {
+		}, logo_default), ...name ? [h("div", { class: "header-actions" }, renderLangToggle(), h("a", {
 			id: "update-btn",
 			style: { display: "none" }
 		}), h("a", {
@@ -1783,44 +2081,51 @@
 			href: "#",
 			onclick: (e) => {
 				e.preventDefault();
-				window.print();
+				printAs("fr");
 			}
-		}, html("span", { class: "export-icon" }, ExportSvg), "PDF"), h("a", {
+		}, html("span", { class: "export-icon" }, ExportSvg), t("header.exportFr")), h("a", {
+			id: "export-btn-en",
+			href: "#",
+			onclick: (e) => {
+				e.preventDefault();
+				printAs("en");
+			}
+		}, html("span", { class: "export-icon" }, ExportSvg), t("header.exportEn")), h("a", {
 			id: "logout",
 			href: "#",
 			onclick: (e) => {
 				e.preventDefault();
 				window.location.href = "https://ionisepita-auth.np-auriga.nfrance.net/auth/realms/npionisepita/protocol/openid-connect/logout?post_logout_redirect_uri=" + encodeURIComponent("https://auriga.epita.fr");
 			}
-		}, "Se deconnecter"))] : []), h("div", { id: "main" }, h("div", { class: "content" }, ...!apiError ? [
+		}, t("header.logout")))] : []), h("div", { id: "main" }, h("div", { class: "content" }, ...!apiError ? [
 			h("div", { class: "filters" }, ...filters.map((f) => renderComboBox(f.name, f.values, filtersValues[f.id], (choice) => {
 				if (f.id === "semester") onSemesterChange(choice.value);
 			}))),
-			h("div", { class: "header" }, "Derniers changements", h("hr")),
-			...visibleUpdates.length === 0 ? [h("div", { class: "no-updates" }, "Aucun changement depuis votre derniere visite.")] : [],
+			h("div", { class: "header" }, t("sidebar.changes"), h("hr")),
+			...visibleUpdates.length === 0 ? [h("div", { class: "no-updates" }, t("sidebar.noChanges"))] : [],
 			h("div", { class: "updates" }, ...visibleUpdates.map(renderUpdate)),
-			h("div", { class: "header" }, "Moyennes", h("hr")),
+			h("div", { class: "header" }, t("sidebar.averages"), h("hr")),
 			h("div", { class: "big-list" }, ...avgEntries.map((e) => h("div", { class: "entry" }, h("div", { class: "point" }), h("div", { class: "name" }, e.label), h("div", { class: "point small" }), h("div", { class: "mark" }, h("span", {
 				class: "value",
 				style: { color: e.colored ? gradeColor(e.value) : "auto" }
 			}, formatGrade(e.value)), "\xA0/ 20"))))
-		] : [], ...!hasCachedData && apiError ? [h("div", { class: "empty-state" }, h("div", { class: "empty-state-text" }, "Aucune note en cache"), h("div", { class: "empty-state-hint" }, "Les notes seront disponibles ici une fois la connexion rétablie."))] : [
+		] : [], ...!hasCachedData && apiError ? [h("div", { class: "empty-state" }, h("div", { class: "empty-state-text" }, t("errors.noCachedTitle")), h("div", { class: "empty-state-hint" }, t("empty.hint")))] : [
 			...coeffMeta ? [h("div", { class: "header" }, h("div", { class: "track-info" }, h("span", { class: "track-info-name" }, coeffMeta.name || [coeffMeta.track, coeffMeta.major].filter(Boolean).join(" ")), h("span", { class: "track-info-detail" }, `${coeffMeta.track} ${coeffMeta.semester} — 20${coeffMeta.year.slice(0, 2)}/20${coeffMeta.year.slice(2)}`)), h("hr"))] : [],
-			h("div", { class: "coeff-info" }, h("div", { class: "coeff-main" }, h("div", { class: "point" }), h("div", { class: "coeff-content" }, coeffSource ? h("span", {}, "Coefficients corrigés par la communauté") : h("span", {}, "Coefficients non corrigés ", h("span", { class: "coeff-muted" }, "(Auriga les considère tous égaux)")))), h("div", { class: "coeff-links" }, ...coeffSource ? [h("a", {
+			h("div", { class: "coeff-info" }, h("div", { class: "coeff-main" }, h("div", { class: "point" }), h("div", { class: "coeff-content" }, coeffSource ? h("span", {}, t("coeff.corrected")) : h("span", {}, t("coeff.uncorrected"), h("span", { class: "coeff-muted" }, t("coeff.uncorrectedHint"))))), h("div", { class: "coeff-links" }, ...coeffSource ? [h("a", {
 				href: `${app.repository}/blob/master/coefficients/${coeffSource}`,
 				target: "_blank",
 				class: "link colored"
-			}, "Voir la source"), ...coeffTemplate ? ["\xA0·\xA0", createCopyTemplateBtn(coeffTemplate)] : []] : [...coeffTemplate ? [createCopyTemplateBtn(coeffTemplate), "\xA0·\xA0"] : [], h("a", {
+			}, t("coeff.viewSource")), ...coeffTemplate ? ["\xA0·\xA0", createCopyTemplateBtn(coeffTemplate)] : []] : [...coeffTemplate ? [createCopyTemplateBtn(coeffTemplate), "\xA0·\xA0"] : [], h("a", {
 				href: `${app.repository}/tree/master/coefficients`,
 				target: "_blank",
 				class: "link colored"
-			}, "Contribuer")])),
+			}, t("coeff2.contribute"))])),
 			h("hr", { class: "separator" }),
 			...moduleEls
 		])), renderFooter()));
 		if (hasCachedData) {
 			container.appendChild(renderPrintView(marks, averages, coeffMeta, name));
-			const parts = ["Bulletin"];
+			const parts = [t("print.filenameBase")];
 			if (coeffMeta?.semester) parts.push(coeffMeta.semester);
 			if (name) parts.push(name);
 			document.title = parts.join(" — ");
@@ -1843,6 +2148,7 @@
 		init_components();
 		init_print();
 		init_version_check();
+		init_i18n();
 		ExportSvg = "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\"/><polyline points=\"9 15 12 18 15 15\"/></svg>";
 		UpdateSvg = "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 2v6h-6\"/><path d=\"M3 12a9 9 0 0 1 15-6.7L21 8\"/><path d=\"M3 22v-6h6\"/><path d=\"M21 12a9 9 0 0 1-15 6.7L3 16\"/></svg>";
 	}));
