@@ -6,7 +6,6 @@ import { app } from '../app.js';
 import { h, html, gradeColor, formatGrade, gradeSpan, signSvg, hasEqualCoefficients } from './dom.js';
 import { ComboBoxArrowSvg, UpdateArrowSvg } from './dom.js';
 import { copyCodeEl } from './tooltip.js';
-import { getLang, t } from '../i18n.js';
 
 // --- ComboBox (semester selector) -----------------------------------------------
 
@@ -84,26 +83,24 @@ export function renderUpdate(upd) {
 // --- Subject card (one subject with its marks) ----------------------------------
 
 export function renderSubject(subject, moduleId) {
-    const lang = getLang();
-    const subjectName = lang === 'en' ? (subject.nameEn || subject.name) : subject.name;
     // Left side: strip module prefix from code (e.g. "CN_PROD" under module "CN" → "PROD")
     const shortId = subject.id.startsWith(moduleId + '_') ? subject.id.slice(moduleId.length + 1) : subject.id;
     const rawCode = shortId.replace(/_/g, ' ');
     // Full resolved name
-    const fullName = subjectName !== subject.id.replace(/_/g, ' ') ? subjectName : null;
+    const fullName = subject.name !== subject.id.replace(/_/g, ' ') ? subject.name : null;
     // For very short cryptic codes (2-3 letter abbreviations), prefer the full name — but only if it fits
     const useNameAsLabel = fullName && rawCode.length < 5 && fullName.length <= 16;
     const codeLabel = useNameAsLabel ? fullName : rawCode;
 
     const metaParts = [];
-    if (subject.classAverage != null) metaParts.push(t('badges.promoMeta', formatGrade(subject.classAverage)));
-    if (!subject._overridden && subject.coefficient != null && subject.coefficient !== 1) metaParts.push(t('badges.coeffMeta', formatGrade(subject.coefficient)));
+    if (subject.classAverage != null) metaParts.push(`promo: ${formatGrade(subject.classAverage)}`);
+    if (!subject._overridden && subject.coefficient != null && subject.coefficient !== 1) metaParts.push(`coeff. ${formatGrade(subject.coefficient)}`);
 
     const bottomChildren = [h('div', { class: 'average' }, gradeSpan(subject.average), '\u00a0/ 20')];
     if (metaParts.length || subject._overridden) {
         const metaChildren = [];
         if (metaParts.length) metaChildren.push(`(${metaParts.join(', ')})`);
-        if (subject._overridden) metaChildren.push(h('span', { class: 'coeff-badge coef' }, t('badges.coef', subject.coefficient)));
+        if (subject._overridden) metaChildren.push(h('span', { class: 'coeff-badge coef' }, `coef. ${subject.coefficient}`));
         bottomChildren.push(h('div', { class: 'class-average' }, ...metaChildren));
     }
 
@@ -116,13 +113,13 @@ export function renderSubject(subject, moduleId) {
     // Right side: marks panel, with group headers when marks share a course name
     function renderMark(mark) {
         const meta = [];
-        if (mark.classAverage != null) meta.push(t('badges.avgMeta', formatGrade(mark.classAverage)));
+        if (mark.classAverage != null) meta.push(`moyenne: ${formatGrade(mark.classAverage)}`);
         if (!hasEqualCoefficients(subject) && !mark._overridden) meta.push(`${Math.round(mark.coefficient * 100)}%`);
         const hasOverride = mark._overridden && mark._rawCoefficient != null;
 
         // Strip subject/group name prefix from mark name to avoid redundancy
-        let markName = lang === 'en' ? (mark.nameEn || mark.name) : mark.name;
-        const prefix = (lang === 'en' ? (mark._groupEn || mark._group) : mark._group) || fullName;
+        let markName = mark.name;
+        const prefix = mark._group || fullName;
         if (prefix) {
             if (markName.startsWith(prefix + ' - ')) markName = markName.slice(prefix.length + 3);
             else if (markName.startsWith(prefix + ' ')) markName = markName.slice(prefix.length + 1);
@@ -140,7 +137,7 @@ export function renderSubject(subject, moduleId) {
         if (meta.length || hasOverride) {
             const metaChildren = [];
             if (meta.length) metaChildren.push(h('span', { class: 'parenthesis' }, '('), meta.join(', '), h('span', { class: 'parenthesis' }, ')'));
-            if (hasOverride) metaChildren.push(h('span', { class: 'coeff-badge coef' }, t('badges.coef', mark._rawCoefficient)));
+            if (hasOverride) metaChildren.push(h('span', { class: 'coeff-badge coef' }, `coef. ${mark._rawCoefficient}`));
             markChildren.push(h('div', { class: 'class-average' }, ...metaChildren));
         }
 
@@ -151,16 +148,15 @@ export function renderSubject(subject, moduleId) {
     const marksContent = [];
     let lastGroup = null;
     for (const mark of subject.marks) {
-        const group = lang === 'en' ? (mark._groupEn || mark._group) : mark._group;
-        if (group && group !== lastGroup) {
-            marksContent.push(h('div', { class: 'marks-title' }, group));
-            lastGroup = group;
+        if (mark._group && mark._group !== lastGroup) {
+            marksContent.push(h('div', { class: 'marks-title' }, mark._group));
+            lastGroup = mark._group;
         }
         marksContent.push(renderMark(mark));
     }
 
     const marksEl = subject.marks.length === 0
-        ? h('div', { class: 'no-marks' }, t('marks.none'))
+        ? h('div', { class: 'no-marks' }, 'Aucune note')
         : h('div', { class: 'marks' },
             ...(fullName && !useNameAsLabel && !lastGroup ? [h('div', { class: 'marks-title' }, fullName)] : []),
             ...marksContent
@@ -172,22 +168,22 @@ export function renderSubject(subject, moduleId) {
 // --- Footer ---------------------------------------------------------------------
 
 export function renderFooter() {
-    const resetLink = h('a', { href: '#', onclick: (e) => { e.preventDefault(); localStorage.clear(); window.location.reload(); } }, t('footer.reset'));
-    const exportBtn = h('a', { href: '#', onclick: (e) => { e.preventDefault(); window.print(); } }, t('footer.exportPdf'));
+    const resetLink = h('a', { href: '#', onclick: (e) => { e.preventDefault(); localStorage.clear(); window.location.reload(); } }, 'Reset');
+    const exportBtn = h('a', { href: '#', onclick: (e) => { e.preventDefault(); window.print(); } }, 'Exporter PDF');
     return h('div', { id: 'footer' },
         h('div', { id: 'links' },
             exportBtn,
             '\u00a0\u00b7\u00a0',
             h('a', { href: `${app.repository}/tree/master/coefficients`, target: '_blank' }, 'Coefficients'),
             '\u00a0\u00b7\u00a0',
-            h('a', { href: app.repository, target: '_blank' }, t('footer.sources')),
+            h('a', { href: app.repository, target: '_blank' }, 'Sources'),
             '\u00a0\u00b7\u00a0',
             resetLink
         ),
         h('p', { class: 'subtext' },
             h('span', {}, `${app.name} v${app.version} \u00a9 ${new Date().getFullYear()} KazeTachinuu`),
             h('br'),
-            h('span', {}, t('footer.licensed')),
+            h('span', {}, 'Licensed under '),
             h('a', { class: 'link colored', href: `${app.repository}/blob/master/LICENSE`, target: '_blank' }, 'MIT License')
         )
     );

@@ -45,22 +45,6 @@ async function getMenuConfig() {
 let _cachedSynthesisEntries = null;
 let _componentTypesPromise;
 
-async function fetchSynthesisEntries(menuEntryId, queryId) {
-    const [rawFr, rawEn] = await Promise.all([
-        fetchAllSearchResults(menuEntryId, queryId, 'fr'),
-        fetchAllSearchResults(menuEntryId, queryId, 'en'),
-    ]);
-    const frEntries = rawFr.map(line => parseSynthesisLine(line, 'fr')).filter(Boolean);
-    const enEntries = rawEn.map(line => parseSynthesisLine(line, 'en')).filter(Boolean);
-    validateParseResults('synthesis', rawFr, frEntries);
-
-    const byCode = new Map(enEntries.map(e => [e.examCode, e]));
-    return frEntries.map(fr => {
-        const en = byCode.get(fr.examCode);
-        return en ? { ...fr, nameEn: en.nameEn || en.name || fr.nameEn } : fr;
-    });
-}
-
 /** Fetch component type map from the pedagogical endpoint, or null if unavailable. */
 function getComponentTypes() {
     if (_componentTypesPromise) return _componentTypesPromise;
@@ -89,7 +73,10 @@ function getComponentTypes() {
 export async function getMarksFilters() {
     const config = await getMenuConfig();
     const synth = config.synthesis;
-    const entries = await fetchSynthesisEntries(synth.menuEntryId, synth.queryId);
+    const rawLines = await fetchAllSearchResults(synth.menuEntryId, synth.queryId);
+
+    const entries = rawLines.map(parseSynthesisLine).filter(Boolean);
+    validateParseResults('synthesis', rawLines, entries);
     _cachedSynthesisEntries = entries;
 
     const semesters = new Map();
@@ -133,7 +120,12 @@ export async function getMarks(filters) {
             }),
         _cachedSynthesisEntries
             ? Promise.resolve(_cachedSynthesisEntries)
-            : fetchSynthesisEntries(config.synthesis.menuEntryId, config.synthesis.queryId),
+            : fetchAllSearchResults(config.synthesis.menuEntryId, config.synthesis.queryId)
+                .then(raw => {
+                    const entries = raw.map(parseSynthesisLine).filter(Boolean);
+                    validateParseResults('synthesis', raw, entries);
+                    return entries;
+                }),
         getComponentTypes(),
     ]);
 

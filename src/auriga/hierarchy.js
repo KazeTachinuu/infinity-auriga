@@ -24,11 +24,6 @@ const EVAL_LABELS = {
     PRJ: 'Projet', PROJ: 'Projet', FAF: 'Contrôle continu',
 };
 
-const EVAL_LABELS_EN = {
-    EX: 'Exam', EXF: 'Final exam', EXO: 'Oral exam',
-    PRJ: 'Project', PROJ: 'Project', FAF: 'Continuous assessment',
-};
-
 
 /**
  * @param {string} code - The full exam code
@@ -63,7 +58,6 @@ export function buildNameLookup(entries) {
     for (const entry of entries) {
         lookup.set(entry.examCode, {
             name: entry.name,
-            nameEn: entry.nameEn,
             avgPreRatt: entry.avgPreRatt,
             avgFinal: entry.avgFinal,
         });
@@ -256,18 +250,14 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
         if (!modules.has(moduleCode)) {
             const info = resolveName(moduleCode, '_' + moduleId, nameLookup);
             let name = moduleId;
-            let nameEn = moduleId;
             if (info) {
                 name = info.name.length <= 40 ? info.name : moduleId;
-                const en = info.nameEn || info.name;
-                nameEn = en.length <= 40 ? en : moduleId;
             }
             const modPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
             modules.set(moduleCode, {
                 id: moduleId,
                 _code: moduleCode,
                 name,
-                nameEn,
                 average: null,
                 classAverage: isNaN(modPromo) ? null : modPromo,
                 subjects: new Map(),
@@ -279,12 +269,10 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
         if (!mod.subjects.has(subject.code)) {
             const info = resolveName(subject.code, '_' + subject.id, nameLookup);
             const subPromo = info?.avgPreRatt ? parseFloat(info.avgPreRatt) : NaN;
-            const fallbackName = subject.id.replace(/_/g, ' ');
             mod.subjects.set(subject.code, {
                 id: subject.id,
                 _code: subject.code,
-                name: info ? info.name : fallbackName,
-                nameEn: info ? (info.nameEn || info.name) : fallbackName,
+                name: info ? info.name : subject.id.replace(/_/g, ' '),
                 average: null,
                 classAverage: isNaN(subPromo) ? null : subPromo,
                 coefficient: 1,
@@ -302,7 +290,6 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
             id: sub.marks.length,
             _code: grade.examCode,
             name: examInfo ? examInfo.name : (parsed.evalType || 'Note'),
-            nameEn: examInfo ? (examInfo.nameEn || examInfo.name) : (parsed.evalType || 'Mark'),
             value: grade.mark,
             classAverage: isNaN(promoAvg) ? null : promoAvg,
             coefficient: grade.coefficient,
@@ -327,36 +314,23 @@ export function buildGradeTree(grades, nameLookup, componentTypes = null) {
 
             // Count how many marks share each base
             const baseCounts = new Map();
-            const baseCountsEn = new Map();
             for (const mark of sub.marks) {
                 const base = baseName(mark.name);
-                const baseEn = baseName(mark.nameEn || mark.name);
                 baseCounts.set(base, (baseCounts.get(base) || 0) + 1);
-                baseCountsEn.set(baseEn, (baseCountsEn.get(baseEn) || 0) + 1);
             }
 
             // Apply grouping to marks whose base has 2+ members
             for (const mark of sub.marks) {
                 const base = baseName(mark.name);
-                const baseEn = baseName(mark.nameEn || mark.name);
-                const grouped = baseCounts.get(base) >= 2;
-                const groupedEn = baseCountsEn.get(baseEn) >= 2;
-                if (!grouped && !groupedEn) continue;
+                if (baseCounts.get(base) < 2) continue;
 
-                if (grouped) mark._group = base;
-                if (groupedEn) mark._groupEn = baseEn;
-                if (grouped && mark.name === base) {
+                mark._group = base;
+                if (mark.name === base) {
                     // No suffix — use eval type as label
                     const parsed = parseExamCode(mark._code);
                     mark.name = parsed?.evalType
                         ? (EVAL_LABELS[parsed.evalType] || parsed.evalType)
                         : base;
-                }
-                if (groupedEn && mark.nameEn === baseEn) {
-                    const parsed = parseExamCode(mark._code);
-                    mark.nameEn = parsed?.evalType
-                        ? (EVAL_LABELS_EN[parsed.evalType] || parsed.evalType)
-                        : baseEn;
                 }
                 // Marks with suffix get prefix stripped in rendering
             }

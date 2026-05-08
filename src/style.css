@@ -73,14 +73,14 @@ button:not(.opaque):active, a:not(.opaque):active, .clickable:not(.opaque):activ
 #header #logo { flex-shrink: 0; width: 400px; margin-top: 25px; margin-left: 12.5px; }
 #header #logo svg { width: 100%; height: auto; }
 .header-actions { align-items: center; gap: clamp(12px, 2vw, 20px); }
-#export-btn, #export-btn-en {
+#export-btn {
     display: flex; align-items: center; gap: 6px;
     padding: 6px 14px; border-radius: 8px;
     background: var(--surface-alt); color: var(--text-primary);
     font-size: clamp(13px, 1.5vw, 16px); font-weight: 600;
     transition: background .15s, opacity .15s;
 }
-#export-btn:hover, #export-btn-en:hover { background: var(--dot-color); }
+#export-btn:hover { background: var(--dot-color); }
 .export-icon { display: flex; align-items: center; }
 .export-icon svg { width: clamp(14px, 1.5vw, 18px); height: auto; }
 #update-btn {

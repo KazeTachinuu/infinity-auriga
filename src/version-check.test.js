@@ -1,4 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
+import { version as localVersion } from '../package.json';
+
+function bumpMinor(version) {
+    const [major, minor] = version.split('.').map(Number);
+    return `${major}.${minor + 1}.0`;
+}
+
+function previousPatch(version) {
+    const [major, minor, patch] = version.split('.').map(Number);
+    if (patch > 0) return `${major}.${minor}.${patch - 1}`;
+    if (minor > 0) return `${major}.${minor - 1}.0`;
+    return '0.0.0';
+}
 
 // Test the isNewer logic directly by importing the module and mocking fetch
 describe('version check', () => {
@@ -17,7 +30,7 @@ describe('version check', () => {
 
     it('detects newer minor version', async () => {
         vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
-            ok: true, json: () => Promise.resolve({ version: '1.10.0' }),
+            ok: true, json: () => Promise.resolve({ version: bumpMinor(localVersion) }),
         })));
 
         const { checkForUpdate } = await import('./version-check.js');
@@ -29,7 +42,7 @@ describe('version check', () => {
 
     it('returns false when same version', async () => {
         vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
-            ok: true, json: () => Promise.resolve({ version: '1.9.0' }),
+            ok: true, json: () => Promise.resolve({ version: localVersion }),
         })));
 
         const { checkForUpdate } = await import('./version-check.js');
@@ -41,7 +54,7 @@ describe('version check', () => {
 
     it('returns false when older version', async () => {
         vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
-            ok: true, json: () => Promise.resolve({ version: '1.8.0' }),
+            ok: true, json: () => Promise.resolve({ version: previousPatch(localVersion) }),
         })));
 
         const { checkForUpdate } = await import('./version-check.js');

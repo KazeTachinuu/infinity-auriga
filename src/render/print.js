@@ -1,14 +1,10 @@
 /**
  * Print view — generates a clean bulletin-style table for PDF export.
  * Hidden on screen, shown only in @media print.
- *
- * Pass lang='en' (or any registered i18n lang) to render that language's variant.
- * Course names come from Auriga's caption.{fr,en} via mod.name / mod.nameEn.
  */
 
 import { h } from './dom.js';
 import { app } from '../app.js';
-import { tFor, getLang } from '../i18n.js';
 
 function fmt(v) {
     if (v === 0.01) return 'Abs.';
@@ -16,26 +12,21 @@ function fmt(v) {
     return v.toFixed(2).replace('.', ',');
 }
 
-export function renderPrintView(marks, averages, coeffMeta, name, lang = getLang()) {
-    // The print view honors a lang override (button click) without flipping global state,
-    // so we resolve every string against the explicit lang via tFor.
-    const tr = (key, ...args) => tFor(lang, key, ...args);
-    const pickName = (mod) => (lang === 'en' ? (mod.nameEn || mod.name) : mod.name);
-
+export function renderPrintView(marks, averages, coeffMeta, name) {
     const rows = [];
     for (const mod of marks) {
         rows.push(h('tr', { class: 'p-ue' },
-            h('td', { class: 'p-left' }, pickName(mod)),
+            h('td', { class: 'p-left' }, mod.name),
             h('td', {}, mod._overridden ? String(mod.coefficient) : ''),
             h('td', {}, fmt(mod.classAverage)),
             h('td', {}, fmt(mod.average)),
         ));
         for (const sub of mod.subjects) {
-            const subDisplayName = pickName(sub);
-            const hasRealName = subDisplayName !== sub.id.replace(/_/g, ' ');
+            // Use real name if available, otherwise strip module prefix from ID for a cleaner fallback
+            const hasRealName = sub.name !== sub.id.replace(/_/g, ' ');
             const shortId = sub.id.startsWith(mod.id + '_') ? sub.id.slice(mod.id.length + 1) : sub.id;
-            const subName = hasRealName ? subDisplayName : shortId.replace(/_/g, ' ');
-            const coefTag = sub._overridden ? h('span', { class: 'p-coef' }, tr('badges.coef', sub.coefficient)) : null;
+            const subName = hasRealName ? sub.name : shortId.replace(/_/g, ' ');
+            const coefTag = sub._overridden ? h('span', { class: 'p-coef' }, `coef. ${sub.coefficient}`) : null;
             rows.push(h('tr', { class: 'p-sub' },
                 h('td', { class: 'p-left' }, subName, ...(coefTag ? [coefTag] : [])),
                 h('td', {}),
@@ -45,7 +36,7 @@ export function renderPrintView(marks, averages, coeffMeta, name, lang = getLang
         }
     }
     rows.push(h('tr', { class: 'p-total' },
-        h('td', { class: 'p-left', colspan: '2' }, tr('print.overallAvg')),
+        h('td', { class: 'p-left', colspan: '2' }, 'MOYENNE GÉNÉRALE'),
         h('td', {}, fmt(averages.promo)),
         h('td', {}, fmt(averages.student)),
     ));
@@ -59,8 +50,8 @@ export function renderPrintView(marks, averages, coeffMeta, name, lang = getLang
     return h('div', { id: 'print-view' },
         h('div', { class: 'p-header' },
             h('div', { class: 'p-header-left' },
-                ...(trackCode && year ? [h('div', { class: 'p-info' }, tr('print.cycleYear', trackCode, year))] : []),
-                ...(semNum ? [h('div', { class: 'p-info' }, tr('print.bulletin', semNum))] : []),
+                ...(trackCode && year ? [h('div', { class: 'p-info' }, `Cycle ${trackCode} — Année universitaire : ${year}`)] : []),
+                ...(semNum ? [h('div', { class: 'p-info' }, `Bulletin du Semestre ${semNum}`)] : []),
                 ...(name ? [h('div', { class: 'p-student' }, name)] : []),
             ),
             ...(trackLabel ? [h('div', { class: 'p-header-right' }, trackLabel)] : []),
@@ -68,14 +59,16 @@ export function renderPrintView(marks, averages, coeffMeta, name, lang = getLang
         h('table', { class: 'p-table' },
             h('thead', {},
                 h('tr', {},
-                    h('th', { class: 'p-left p-col-name' }, tr('print.colSemester', semNum)),
-                    h('th', { class: 'p-col-ects' }, tr('print.colEcts')),
-                    h('th', { class: 'p-col-avg' }, tr('print.colAvgPromoL1'), h('br'), tr('print.colAvgPromoL2')),
-                    h('th', { class: 'p-col-avg' }, tr('print.colAvgStudentL1'), h('br'), tr('print.colAvgStudentL2')),
+                    h('th', { class: 'p-left p-col-name' }, `Semestre ${semNum}`),
+                    h('th', { class: 'p-col-ects' }, 'ECTS ACQUIS'),
+                    h('th', { class: 'p-col-avg' }, 'Moyenne', h('br'), 'Promotion'),
+                    h('th', { class: 'p-col-avg' }, 'Moyenne', h('br'), 'Étudiant'),
                 ),
             ),
             h('tbody', {}, ...rows),
         ),
-        h('div', { class: 'p-footer' }, tr('print.footer', app.version)),
+        h('div', { class: 'p-footer' },
+            `Exporté depuis Infinity Auriga v${app.version} — ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+        ),
     );
 }
